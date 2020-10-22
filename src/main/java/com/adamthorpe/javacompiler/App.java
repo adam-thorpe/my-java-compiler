@@ -15,13 +15,7 @@ import com.github.javaparser.utils.SourceRoot;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-/**
- * Hello world!
- *
- */
 public class App {
-
-  private static String classString = "public class A { public void B() { System.out.println('hello')} }";
 
   public static void main( String[] args ) {
     try {
@@ -29,11 +23,10 @@ public class App {
       SourceRoot sourceRoot = new SourceRoot(CodeGenerationUtils.mavenModuleRoot(App.class));
 
       CompilationUnit cu = sourceRoot.parse("", fileToCompile);
+      Optional<ClassOrInterfaceDeclaration> helloWorldClass = cu.getClassByName("HelloWorld");
 
-      // CompilationUnit cu = StaticJavaParser.parse(classString);
-    Optional<ClassOrInterfaceDeclaration> helloWorldClass = cu.getClassByName("HelloWorld");
+      System.out.println(helloWorldClass);
 
-    System.out.println(helloWorldClass);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(0);
@@ -45,6 +38,7 @@ public class App {
       throw new Exception("No input file detected");
     }
 
+    // Currently just returns the first argument
     return args[0];
   }
 }
