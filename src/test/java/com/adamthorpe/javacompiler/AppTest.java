@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * Test App
  */
-public class TestApp {
+public class AppTest {
 
   @Test
   public void noArgsShouldThrowException() {
