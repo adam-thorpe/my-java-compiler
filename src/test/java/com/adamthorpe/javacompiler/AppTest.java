@@ -1,20 +1,20 @@
 package com.adamthorpe.javacompiler;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.Test;
 
 /**
- * Unit test for simple App.
+ * Test App
  */
-public class AppTest 
-{
-    /**
-     * Rigorous Test :-)
-     */
-    @Test
-    public void shouldAnswerWithTrue()
-    {
-        assertTrue( true );
-    }
+public class TestApp {
+
+  @Test
+  public void noArgsShouldThrowException() {
+    String[] args = {};
+
+    Exception e = assertThrows(Exception.class, () -> App.parseArguments(args));
+    assertTrue(e.getMessage().equals("No input file detected"));
+  }
 }
