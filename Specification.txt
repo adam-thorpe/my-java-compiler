@@ -1,0 +1,46 @@
+Implemented
+	- Package
+	- Imports
+	- Class
+		○ Public
+	- Types
+		○ Int
+		○ Bool
+		○ Char
+		○ String
+		○ Class Types
+	- Variable Declaration
+		○ Global/Local
+		○ Public
+	- Method Declaration
+		○ Public/Static
+		○ Return types Void/Types
+		○ Up to one parameter
+	- Blocks
+		○ If then else
+		○ While
+	- Expressions
+		○ == < >
+		○ + - * /
+		○ OR AND
+	- Assign values to variables
+	- Invoke
+		○ Method
+		○ Class
+
+Not Implemented 
+	- Constructors
+	- Interfaces
+	- Throws
+	- Private/Protected/Abstract/Final
+	- Super classes
+	- Arrays
+
+	- Structures
+		○ For
+		○ Switch
+		○ Do
+		○ Break
+		○ Continue
+		○ Synchronized
+		○ Try

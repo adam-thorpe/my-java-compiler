@@ -1,0 +1,96 @@
+BNF
+<compilation unit> ::= <package declaration>? <import declarations>? <type declarations>?
+
+Declarations
+<package declaration> ::= package <package name> ;
+<import declarations> ::= <import declaration> | <import declarations> <import declaration>
+<import declaration> ::= <single type import declaration>
+<single type import declaration> ::= import <type name> ;
+<type declarations> ::= <type declaration>
+<type declaration> ::= <class declaration>
+
+<class declaration> ::= <class modifiers>? class <identifier> <class body>
+<class modifiers> ::= <class modifier>
+<class modifier> ::= public
+<class body> ::= { <class body declarations>? }
+
+<class body declarations> ::= <class body declaration> | <class body declarations> <class body declaration>
+<class body declaration> ::= <class member declaration>
+<class member declaration> ::= <field declaration> | <method declaration>
+
+<field declaration> ::= <field modifiers>? <type> <variable declarators> ;
+<field modifiers> ::= <field modifier>
+<field modifier> ::= public
+<variable declarators> ::= <variable declarator>
+<variable declarator> ::= <variable declarator id> | <variable declarator id> = <variable initializer>
+<variable declarator id> ::= <identifier> | <variable declarator id> [ ]
+<variable initializers> ::= <variable initializer> | <variable initializers> , <variable initializer>
+<variable initializer> ::= <expression> | <array initializer>
+<array initializer> ::= { <variable initializers>? }
+
+<method declaration> ::= <method header> <method body>
+<method header> ::= <method modifiers>? <result type> <method declarator>
+<result type> ::= <type> | void
+<method modifiers> ::= <method modifier> | <method modifiers> <method modifier>
+<method modifier> ::= public | static
+<method declarator> ::= <identifier> ( <formal parameter list>? )
+<method body> ::= <block> | ;
+
+<formal parameter list> ::= <formal parameter>
+<formal parameter> ::= <type> <variable declarator id>
+
+Types
+<type> ::= <primitive type> | <reference type>
+<primitive type> ::= <numeric type> | boolean
+<numeric type> ::= <integral type>
+<integral type> ::= int | char
+<reference type> ::= <class or interface type>
+<class or interface type> ::= <class type>
+<class type> ::= <type name>
+
+Blocks
+<block> ::= { <block statements>? }
+<block statements> ::= <block statement> | <block statements> <block statement>
+<block statement> ::= <local variable declaration statement> | <statement>
+<local variable declaration statement> ::= <local variable declaration> ;
+<local variable declaration> ::= <type> <variable declarators>
+
+<statement> ::= <statement without trailing substatement> | <if then else statement> |  <for statement>
+<statement without trailing substatement> ::= <block> | <empty statement> | <expression statement> | <return statement>
+<empty statement> ::= ;
+<expression statement> ::= <statement expression> ;
+<statement expression> ::= <assignment expression> | <class invocation> | <method invocation>
+
+<if then else statement>::= if ( <expression> ) <statement> else <statement>
+<while statement> ::= while ( <expression> ) <statement>
+
+Expressions
+<expression> ::= <basic expression> | <conditional expression> | <assignment expression> | <equality expression>
+<basic expression> ::= <identifier> | <value> | <basic expression> <operator> <basic expression> | <class invocation> | <method invocation>
+<operator> ::= + | - | * | /
+
+<conditional expression> ::= <expression> || <expression> | <expression> && <expression>
+<assignment expression>  ::= <left hand side> = <basic expression>
+<left hand side> ::= <identifier> | <type> <identifier>
+<equality expression> ::= <basic expression> <equality operator> <basic expression>
+<equality operator> ::= == | < | >
+
+<class invocation> ::= new <identifier> ( <argument list>? )
+<method invocation> ::= <primary> ( <argument list>? )
+<primary> ::= <identifier> | <identifier> . <primary> | <identifier> ( <argument list>? ) . <primary>
+<argument list> ::= <expression> | <argument list> , <expression>
+
+Tokens
+<identifier> ::= <string>
+<value> ::= <digits>| <bool value> | <char value> | <string value> | null
+<digits> ::= <digit> | <digit> <digits> 
+<digit> ::=  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
+<bool value> ::= true | false 
+<char value> ::= ' <character>  '
+<character> ::= ASCII character
+<string value> ::= " <string>  "
+<string> ::= <character> <string>
+
+<keyword> ::= abstract | boolean | break | byte | case | catch | char | class | const | continue | default | do | double | else | extends | final | finally | float | for | goto | 
+if | implements | import | instanceof | int | interface | long | native | new | package | private | protected | public | return | short | static | super | switch | 
+synchronized | this | throw | throws | transient | try | void | volatile | while
