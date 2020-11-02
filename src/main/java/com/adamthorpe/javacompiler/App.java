@@ -12,6 +12,7 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.Log;
 import com.github.javaparser.utils.SourceRoot;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -19,13 +20,11 @@ public class App {
 
   public static void main( String[] args ) {
     try {
+      // Parse arguments
       String fileToCompile = parseArguments(args);
-      SourceRoot sourceRoot = new SourceRoot(CodeGenerationUtils.mavenModuleRoot(App.class));
 
-      CompilationUnit cu = sourceRoot.parse("", fileToCompile);
-      Optional<ClassOrInterfaceDeclaration> helloWorldClass = cu.getClassByName("HelloWorld");
-
-      System.out.println(helloWorldClass);
+      CompilationUnit cu = StaticJavaParser.parse(new File(fileToCompile));
+      System.out.println(cu);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -33,6 +32,12 @@ public class App {
     }
   }
 
+  /**
+   * Parses the input arguments to the executable
+   * @param args - List of arguments including flags and a single path to the input file
+   * @return - The input file
+   * @throws Exception - Input errors
+   */
   protected static String parseArguments(String[] args) throws Exception {
     if (args.length == 0) {
       throw new Exception("No input file detected");
