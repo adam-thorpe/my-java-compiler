@@ -17,10 +17,18 @@ public class TestByteConvert {
 
   @Parameterized.Parameters
   public static Iterable<Object[]> data() {
-      byte[] arr1 = {-85, -51};
+      byte[] arr1 = {1};
+      byte[] arr2 = {127};
+      byte[] arr3 = {-128};
+      byte[] arr4 = {-1};
+      byte[] arr5 = {-54, -2, -70, -66};
 
       return Arrays.asList(new Object[][] { 
-        {"ABCD", arr1 }
+        {"01", arr1 },
+        {"7F", arr2 },
+        {"80", arr3 },
+        {"FF", arr4 },
+        {"CAFEBABE", arr5 },
       });
   }
 
@@ -38,6 +46,6 @@ public class TestByteConvert {
   }
 
   public void testHexToByteShouldFail() {
-
+    // TO DO
   }
 }
