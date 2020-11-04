@@ -26,7 +26,7 @@ public class ClassFile {
 
   public ClassFile() {
     this.magic_number = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
-    this.minor_version = hexToByteArray("0000");
+    this.minor_version = hexToByteArray("0000"); //Minor version is 0
     this.major_version = hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
     this.constant_pool = hexToByteArray("0000");
