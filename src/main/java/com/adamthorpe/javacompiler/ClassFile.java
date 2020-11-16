@@ -47,7 +47,6 @@ public class ClassFile {
 
     this.attribute_table_size = hexToByteArray("0000");
     this.attribute_table = new byte[0];
-
   }
 
   protected static byte[] hexToByteArray(String hex) {

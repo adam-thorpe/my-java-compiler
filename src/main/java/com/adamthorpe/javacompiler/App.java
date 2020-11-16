@@ -2,18 +2,22 @@ package com.adamthorpe.javacompiler;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
+import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.printer.XmlPrinter;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.Log;
 import com.github.javaparser.utils.SourceRoot;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 
 public class App {
@@ -24,7 +28,8 @@ public class App {
       String fileToCompile = parseArguments(args);
 
       CompilationUnit cu = StaticJavaParser.parse(new File(fileToCompile));
-      System.out.println(cu);
+      ClassFileCreator classFileCreator = new ClassFileCreator(cu);
+      classFileCreator.parse();
 
     } catch (Exception e) {
       e.printStackTrace();
