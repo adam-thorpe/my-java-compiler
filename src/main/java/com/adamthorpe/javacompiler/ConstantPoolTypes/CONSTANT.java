@@ -7,4 +7,11 @@ public abstract class CONSTANT {
   public byte getTag() {
     return tag;
   }
+
+  public byte[] getData() {
+    byte[] data = new byte[1];
+    data[0] = tag;
+
+    return data;
+  }
 }
