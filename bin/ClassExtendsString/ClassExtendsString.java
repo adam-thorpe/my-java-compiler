@@ -1,5 +1,5 @@
 public class ClassExtendsString extends String {
-  public void A() {
-    // Do nothing
+  public String A() {
+    return "Hello";
   }
 }
