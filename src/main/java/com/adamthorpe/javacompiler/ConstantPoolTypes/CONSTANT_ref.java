@@ -1,9 +1,16 @@
 package com.adamthorpe.javacompiler.ConstantPoolTypes;
 
+import com.adamthorpe.javacompiler.ByteConvert;
+
 public abstract class CONSTANT_ref extends CONSTANT {
 
-  protected byte[] class_index = new byte[2]; //u2
-  protected byte[] name_and_type_index = new byte[2]; //u2
+  protected byte[] class_index; //u2
+  protected byte[] name_and_type_index; //u2
+
+  public CONSTANT_ref(int class_index_pos, int name_and_type_index_pos) {
+    this.class_index = ByteConvert.intToBytes(2, class_index_pos);
+    this.name_and_type_index = ByteConvert.intToBytes(2, name_and_type_index_pos);
+  }
 
   @Override
   public byte[] getData() {

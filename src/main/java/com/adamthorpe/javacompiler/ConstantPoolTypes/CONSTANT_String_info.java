@@ -1,11 +1,14 @@
 package com.adamthorpe.javacompiler.ConstantPoolTypes;
 
+import com.adamthorpe.javacompiler.ByteConvert;
+
 public class CONSTANT_String_info extends CONSTANT {
   
-  protected byte[] string_index = new byte[2]; //u2
+  protected byte[] string_index; //u2
 
-  public CONSTANT_String_info() {
-    this.tag = Byte.parseByte("8");
+  public CONSTANT_String_info(int string_index_pos) {
+    this.tag = (byte) 8;
+    this.string_index = ByteConvert.intToBytes(2, string_index_pos);
   }
 
   @Override

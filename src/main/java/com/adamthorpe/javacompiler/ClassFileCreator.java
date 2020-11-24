@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT;
+import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT_Utf8_info;
 import com.adamthorpe.javacompiler.Visitors.ClassVisitor;
 import com.adamthorpe.javacompiler.Visitors.MethodVisitor;
 import com.github.javaparser.JavaParser;
@@ -50,6 +51,7 @@ public class ClassFileCreator {
 
   protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
     System.out.println("Class Name: " + classDeclaration.getName());
+    // CONSTANT_Utf8_info()
 
     for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
       System.out.println("Super Class Name: " + resolveType(superClassType));

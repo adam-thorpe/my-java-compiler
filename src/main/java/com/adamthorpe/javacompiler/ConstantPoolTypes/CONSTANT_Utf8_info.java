@@ -1,13 +1,21 @@
 package com.adamthorpe.javacompiler.ConstantPoolTypes;
 
+import com.adamthorpe.javacompiler.ByteConvert;
+
+import org.checkerframework.checker.units.qual.Length;
+
 public class CONSTANT_Utf8_info extends CONSTANT {
 
-  protected byte[] length = new byte[2]; //u2
+  protected byte[] length; //u2
   protected int lengthInt;
   protected byte[] bytes; //length
 
-  public CONSTANT_Utf8_info() {
-    this.tag = Byte.parseByte("1");
+  public CONSTANT_Utf8_info(String data) {
+    this.tag = (byte) 1;
+
+    this.bytes = data.getBytes();
+    this.lengthInt = bytes.length;
+    this.length = ByteConvert.intToBytes(2, lengthInt);
   }
 
   @Override

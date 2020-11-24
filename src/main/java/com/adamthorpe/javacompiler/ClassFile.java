@@ -1,5 +1,7 @@
 package com.adamthorpe.javacompiler;
 
+import javassist.bytecode.MethodInfo;
+
 public class ClassFile {
   private byte[] magic_number; //u4
   private byte[] minor_version; //u2
@@ -24,29 +26,31 @@ public class ClassFile {
   private byte[] attribute_table_size; //u2
   private byte[] attribute_table; //asize
 
-  public ClassFile() {
+  public ClassFile(byte[] constant_pool, byte[] access_flags, byte[] this_class, byte[] super_class,
+    byte[] interface_table, byte[] field_table, byte[] method_table, byte[] attribute_table) {
+
     this.magic_number = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
     this.minor_version = hexToByteArray("0000"); //Minor version is 0
     this.major_version = hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
-    this.constant_pool = hexToByteArray("0000");
-    this.constant_pool = new byte[0];
+    this.constant_pool_size = hexToByteArray("0000");//todo
+    this.constant_pool = constant_pool;
 
-    this.access_flags = hexToByteArray("0000");
-    this.this_class = hexToByteArray("0000");
-    this.super_class = hexToByteArray("0000");
+    this.access_flags = access_flags;
+    this.this_class = this_class;
+    this.super_class = super_class;
 
-    this.interface_table_size = hexToByteArray("0000");
-    this.interface_table = new byte[0];
+    this.interface_table_size = hexToByteArray("0000");//todo
+    this.interface_table = interface_table;
 
-    this.field_table_size = hexToByteArray("0000");
-    this.field_table = new byte[0];
+    this.field_table_size = hexToByteArray("0000");//todo
+    this.field_table = field_table;
 
-    this.method_table_size = hexToByteArray("0000");
-    this.method_table = new byte[0];
+    this.method_table_size = hexToByteArray("0000");//todo
+    this.method_table = method_table;
 
-    this.attribute_table_size = hexToByteArray("0000");
-    this.attribute_table = new byte[0];
+    this.attribute_table_size = hexToByteArray("0000");//todo
+    this.attribute_table = attribute_table;
   }
 
   protected static byte[] hexToByteArray(String hex) {

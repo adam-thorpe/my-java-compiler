@@ -1,12 +1,16 @@
 package com.adamthorpe.javacompiler.ConstantPoolTypes;
 
+import com.adamthorpe.javacompiler.ByteConvert;
+
 public class CONSTANT_NameAndType_info extends CONSTANT {
   
-  protected byte[] name_index = new byte[2];
-  protected byte[] descriptor_index = new byte[2];
+  protected byte[] name_index; //u2
+  protected byte[] descriptor_index; //u2
 
-  public CONSTANT_NameAndType_info() {
+  public CONSTANT_NameAndType_info(int name_index_pos, int descriptor_index_pos) {
     this.tag = Byte.parseByte("12");
+    this.name_index = ByteConvert.intToBytes(2, name_index_pos);
+    this.descriptor_index = ByteConvert.intToBytes(2, descriptor_index_pos);
   }
 
   @Override
