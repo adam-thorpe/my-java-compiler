@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT;
+import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT_Class_info;
 import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT_Utf8_info;
 import com.adamthorpe.javacompiler.Visitors.ClassVisitor;
 import com.adamthorpe.javacompiler.Visitors.MethodVisitor;
@@ -15,28 +16,32 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 public class ClassFileCreator {
 
   private CompilationUnit cu;
-  private List<CONSTANT> constantPool;
+  private ConstantPool constantPool;
+  private int thisClass;
+  private int superClass;
+  
+  //interfacesTable
+  //fieldsTable
+  //methodsTable
+  //attributesTable
 
   public ClassFileCreator(CompilationUnit cu) {
     this.cu = cu;
-    this.constantPool = new ArrayList<>();
-
+    this.constantPool = new ConstantPool();
   }
 
   protected void parse() {
     ClassOrInterfaceDeclaration classDeclaration = new ClassVisitor().visit(cu, null);
     List<MethodDeclaration> methodDeclarations = new MethodVisitor().visit(cu, null);
 
+    createInitMethodInfo();
     createClassInfo(classDeclaration);
     createMethodInfo(methodDeclarations);
+
   }
 
   protected String resolveType(Type type) {
@@ -49,13 +54,27 @@ public class ClassFileCreator {
     }
   }
 
-  protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
-    System.out.println("Class Name: " + classDeclaration.getName());
-    // CONSTANT_Utf8_info()
+  protected void createInitMethodInfo() {
+    //Default Method
+    constantPool.addMethod_info("java/lang/Object", "<init>", "()V");
+  }
 
-    for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
-      System.out.println("Super Class Name: " + resolveType(superClassType));
+  protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
+
+    // Define this class
+    thisClass = constantPool.addClass_info(classDeclaration.getNameAsString());
+
+    if (classDeclaration.getExtendedTypes().isEmpty()) {
+      // Add default superclass "Object"
+      superClass = constantPool.addClass_info("java/lang/Object");
+    } else {
+      for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
+        System.out.println("Super Class Name: " + resolveType(superClassType));
+
+        // TO DO
+      }
     }
+
   }
 
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
