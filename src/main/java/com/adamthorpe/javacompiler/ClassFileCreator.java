@@ -24,10 +24,10 @@ public class ClassFileCreator {
   private int thisClass;
   private int superClass;
   
-  //interfacesTable
-  //fieldsTable
-  //methodsTable
-  //attributesTable
+  byte[] interfacesTable = new byte[0];
+  byte[] fieldsTable = new byte[0];
+  byte[] methodsTable = new byte [0];
+  byte[] attributesTable = new byte[0];
 
   public ClassFileCreator(CompilationUnit cu) {
     this.cu = cu;
@@ -42,6 +42,13 @@ public class ClassFileCreator {
     createClassInfo(classDeclaration);
     createMethodInfo(methodDeclarations);
 
+    ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable, attributesTable);
+    
+    //print class file
+    for (byte b : classFile.toByteArr()) {
+      String st = String.format("%02X", b);
+      System.out.print(st);
+    }
   }
 
   protected String resolveType(Type type) {

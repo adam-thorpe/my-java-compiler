@@ -23,4 +23,9 @@ public abstract class CONSTANT_ref extends CONSTANT {
     return data;
   }
 
+  @Override
+  public int getLength() {
+    return super.getLength() + 4;
+  }
+
 }

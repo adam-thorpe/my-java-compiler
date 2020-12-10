@@ -23,4 +23,9 @@ public class CONSTANT_NameAndType_info extends CONSTANT {
 
     return data;
   }
+
+  @Override
+  public int getLength() {
+    return super.getLength() + 4;
+  }
 }

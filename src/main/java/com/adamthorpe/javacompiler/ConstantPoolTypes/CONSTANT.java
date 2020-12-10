@@ -14,4 +14,8 @@ public abstract class CONSTANT {
 
     return data;
   }
+
+  public int getLength() {
+    return 1;
+  }
 }

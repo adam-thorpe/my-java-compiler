@@ -55,4 +55,13 @@ public class ConstantPool extends ArrayList<CONSTANT> {
 
     return index;
   }
+
+  public int getLength() {
+    int length = 0;
+    for (CONSTANT entry : this) {
+      length += entry.getLength();
+    }
+
+    return length;
+  }
 }

@@ -1,6 +1,8 @@
 package com.adamthorpe.javacompiler;
 
-import javassist.bytecode.MethodInfo;
+import java.util.ArrayList;
+
+import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT;
 
 public class ClassFile {
   private byte[] magic_number; //u4
@@ -26,30 +28,43 @@ public class ClassFile {
   private byte[] attribute_table_size; //u2
   private byte[] attribute_table; //asize
 
-  public ClassFile(byte[] constant_pool, byte[] access_flags, byte[] this_class, byte[] super_class,
+  public ClassFile(ConstantPool constant_pool, int this_class, int super_class,
     byte[] interface_table, byte[] field_table, byte[] method_table, byte[] attribute_table) {
 
+    // Version Info
     this.magic_number = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
     this.minor_version = hexToByteArray("0000"); //Minor version is 0
     this.major_version = hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
-    this.constant_pool_size = hexToByteArray("0000");//todo
-    this.constant_pool = constant_pool;
+    // Constant Pool
+    this.constant_pool_size = ByteConvert.intToBytes(2, constant_pool.size() + 1);
+    this.constant_pool = new byte[constant_pool.getLength()];
+    int counter = 0;
 
-    this.access_flags = access_flags;
-    this.this_class = this_class;
-    this.super_class = super_class;
+    for(CONSTANT entry : constant_pool) {
+      System.arraycopy(entry.getData(), 0, this.constant_pool, counter, entry.getData().length);
+      counter += entry.getLength();
+    }
 
-    this.interface_table_size = hexToByteArray("0000");//todo
+    // General Info
+    this.access_flags = hexToByteArray("0021");
+    this.this_class = ByteConvert.intToBytes(2, this_class);
+    this.super_class = ByteConvert.intToBytes(2, super_class);
+
+    // Interface Table
+    this.interface_table_size = ByteConvert.intToBytes(2, interface_table.length);//todo
     this.interface_table = interface_table;
 
-    this.field_table_size = hexToByteArray("0000");//todo
+    // Field Table
+    this.field_table_size = ByteConvert.intToBytes(2, field_table.length);//todo
     this.field_table = field_table;
 
-    this.method_table_size = hexToByteArray("0000");//todo
+    // Method Table
+    this.method_table_size = ByteConvert.intToBytes(2, method_table.length);//todo
     this.method_table = method_table;
 
-    this.attribute_table_size = hexToByteArray("0000");//todo
+    // Attribute Table
+    this.attribute_table_size = ByteConvert.intToBytes(2, attribute_table.length);//todo
     this.attribute_table = attribute_table;
   }
 
@@ -73,48 +88,34 @@ public class ClassFile {
   }
 
 
-  protected byte[] toByte() {
-    byte[] result = new byte[getFileSize()];
+  protected byte[] toByteArr() {
+    return toByteArr(getFileSize(),
+      magic_number,
+      minor_version,
+      major_version,
+      constant_pool_size,
+      constant_pool,
+      access_flags,
+      this_class,
+      super_class,
+      interface_table_size,
+      interface_table,
+      field_table_size,
+      field_table,
+      method_table_size,
+      method_table,
+      attribute_table_size,
+      attribute_table);
+  }
+
+  public byte[] toByteArr(int length, byte[] ...data) {
+    byte[] result = new byte[length];
     int counter = 0;
 
-    counter += magic_number.length;
-    System.arraycopy(magic_number, 0, result, 0, counter);
-    counter += minor_version.length;
-    System.arraycopy(minor_version, 0, result, 0, counter);
-    counter += major_version.length;
-    System.arraycopy(major_version, 0, result, 0, counter);
-
-    counter += constant_pool_size.length;
-    System.arraycopy(constant_pool_size, 0, result, 0, counter);
-    counter += constant_pool.length;
-    System.arraycopy(constant_pool, 0, result, 0, counter);
-
-    counter += access_flags.length;
-    System.arraycopy(access_flags, 0, result, 0, counter);
-    counter += this_class.length;
-    System.arraycopy(this_class, 0, result, 0, counter);
-    counter += super_class.length;
-    System.arraycopy(super_class, 0, result, 0, counter);
-
-    counter += interface_table_size.length;
-    System.arraycopy(interface_table_size, 0, result, 0, counter);
-    counter += interface_table.length;
-    System.arraycopy(interface_table, 0, result, 0, counter);
-
-    counter += field_table_size.length;
-    System.arraycopy(field_table_size, 0, result, 0, counter);
-    counter += field_table.length;
-    System.arraycopy(field_table, 0, result, 0, counter);
-
-    counter += method_table_size.length;
-    System.arraycopy(method_table_size, 0, result, 0, counter);
-    counter += method_table.length;
-    System.arraycopy(method_table, 0, result, 0, counter);
-
-    counter += attribute_table_size.length;
-    System.arraycopy(attribute_table_size, 0, result, 0, counter);
-    counter += attribute_table.length;
-    System.arraycopy(attribute_table, 0, result, 0, counter);
+    for(byte[] d : data) {
+      System.arraycopy(d, 0, result, counter, d.length);
+      counter += d.length;
+    }
 
     return result;
   }

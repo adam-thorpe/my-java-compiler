@@ -20,4 +20,9 @@ public class CONSTANT_String_info extends CONSTANT {
 
     return data;
   }
+
+  @Override
+  public int getLength() {
+    return super.getLength() + 2;
+  }
 }

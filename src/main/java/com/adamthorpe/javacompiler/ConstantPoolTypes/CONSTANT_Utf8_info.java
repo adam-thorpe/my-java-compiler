@@ -29,4 +29,9 @@ public class CONSTANT_Utf8_info extends CONSTANT {
     return data;
   }
 
+  @Override
+  public int getLength() {
+    return super.getLength() + 2 + lengthInt;
+  }
+
 }
