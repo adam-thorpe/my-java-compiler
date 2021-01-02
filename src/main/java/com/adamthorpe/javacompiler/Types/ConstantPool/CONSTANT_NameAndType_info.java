@@ -1,4 +1,4 @@
-package com.adamthorpe.javacompiler.ConstantPoolTypes;
+package com.adamthorpe.javacompiler.Types.ConstantPool;
 
 import com.adamthorpe.javacompiler.ByteConvert;
 

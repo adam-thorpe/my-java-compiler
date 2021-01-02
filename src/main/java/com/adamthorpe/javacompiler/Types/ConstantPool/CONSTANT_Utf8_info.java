@@ -1,8 +1,6 @@
-package com.adamthorpe.javacompiler.ConstantPoolTypes;
+package com.adamthorpe.javacompiler.Types.ConstantPool;
 
 import com.adamthorpe.javacompiler.ByteConvert;
-
-import org.checkerframework.checker.units.qual.Length;
 
 public class CONSTANT_Utf8_info extends CONSTANT {
 
@@ -15,6 +13,7 @@ public class CONSTANT_Utf8_info extends CONSTANT {
 
     this.bytes = data.getBytes();
     this.lengthInt = bytes.length;
+    System.out.println(data);
     this.length = ByteConvert.intToBytes(2, lengthInt);
   }
 

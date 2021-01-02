@@ -1,4 +1,4 @@
-package com.adamthorpe.javacompiler.ConstantPoolTypes;
+package com.adamthorpe.javacompiler.Types.ConstantPool;
 
 public class CONSTANT_Fieldref_info extends CONSTANT_ref {
   

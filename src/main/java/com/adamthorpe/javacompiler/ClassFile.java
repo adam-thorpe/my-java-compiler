@@ -1,50 +1,53 @@
 package com.adamthorpe.javacompiler;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import com.adamthorpe.javacompiler.ConstantPoolTypes.CONSTANT;
+import com.adamthorpe.javacompiler.Types.Attributes.Attributes_info;
+import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
+import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
+import com.adamthorpe.javacompiler.Types.Tables.FieldOrMethodTable;
 
 public class ClassFile {
-  private byte[] magic_number; //u4
+  private byte[] magic; //u4
   private byte[] minor_version; //u2
   private byte[] major_version; // u2
 
-  private byte[] constant_pool_size; //u2
-  private byte[] constant_pool; //cpsize
+  private byte[] constant_pool_count; //u2
+  private byte[] constant_pool; //cp_info
 
   private byte[] access_flags; //u2
   private byte[] this_class; //u2
   private byte[] super_class; //u2
 
-  private byte[] interface_table_size; //u2
-  private byte[] interface_table; //isize
+  private byte[] interfaces_count; //u2
+  private byte[] interfaces; //u2
 
-  private byte[] field_table_size; //u2
-  private byte[] field_table; //fsize
+  private byte[] fields_count; //u2
+  private byte[] fields; //fields_info
 
-  private byte[] method_table_size; //u2
-  private byte[] method_table; //msize
+  private byte[] methods_count; //u2
+  private byte[] methods; //methods_info
 
-  private byte[] attribute_table_size; //u2
-  private byte[] attribute_table; //asize
+  private byte[] attributes_count; //u2
+  private byte[] attributes; //attributes_info
 
-  public ClassFile(ConstantPool constant_pool, int this_class, int super_class,
-    byte[] interface_table, byte[] field_table, byte[] method_table, byte[] attribute_table) {
+  public ClassFile(ConstantPool constant_pool, 
+    int this_class, 
+    int super_class,
+    byte[] interface_table, 
+    FieldOrMethodTable field_table, 
+    FieldOrMethodTable method_table, 
+    AttributesTable attribute_table
+  ) {
 
     // Version Info
-    this.magic_number = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
+    this.magic = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
     this.minor_version = hexToByteArray("0000"); //Minor version is 0
     this.major_version = hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
     // Constant Pool
-    this.constant_pool_size = ByteConvert.intToBytes(2, constant_pool.size() + 1);
-    this.constant_pool = new byte[constant_pool.getLength()];
-    int counter = 0;
-
-    for(CONSTANT entry : constant_pool) {
-      System.arraycopy(entry.getData(), 0, this.constant_pool, counter, entry.getData().length);
-      counter += entry.getLength();
-    }
+    this.constant_pool_count = ByteConvert.intToBytes(2, constant_pool.size() + 1);
+    this.constant_pool = constant_pool.getData();
 
     // General Info
     this.access_flags = hexToByteArray("0021");
@@ -52,20 +55,20 @@ public class ClassFile {
     this.super_class = ByteConvert.intToBytes(2, super_class);
 
     // Interface Table
-    this.interface_table_size = ByteConvert.intToBytes(2, interface_table.length);//todo
-    this.interface_table = interface_table;
+    this.interfaces_count = ByteConvert.intToBytes(2, interface_table.length);//todo
+    this.interfaces = interface_table;
 
     // Field Table
-    this.field_table_size = ByteConvert.intToBytes(2, field_table.length);//todo
-    this.field_table = field_table;
+    this.fields_count = ByteConvert.intToBytes(2, field_table.size());
+    this.fields = field_table.getData();
 
     // Method Table
-    this.method_table_size = ByteConvert.intToBytes(2, method_table.length);//todo
-    this.method_table = method_table;
+    this.methods_count = ByteConvert.intToBytes(2, method_table.size());
+    this.methods = method_table.getData();
 
     // Attribute Table
-    this.attribute_table_size = ByteConvert.intToBytes(2, attribute_table.length);//todo
-    this.attribute_table = attribute_table;
+    this.attributes_count = ByteConvert.intToBytes(2, attribute_table.size());//todo
+    this.attributes = attribute_table.getData();
   }
 
   protected static byte[] hexToByteArray(String hex) {
@@ -88,27 +91,27 @@ public class ClassFile {
   }
 
 
-  protected byte[] toByteArr() {
+  public byte[] toByteArr() {
     return toByteArr(getFileSize(),
-      magic_number,
+      magic,
       minor_version,
       major_version,
-      constant_pool_size,
+      constant_pool_count,
       constant_pool,
       access_flags,
       this_class,
       super_class,
-      interface_table_size,
-      interface_table,
-      field_table_size,
-      field_table,
-      method_table_size,
-      method_table,
-      attribute_table_size,
-      attribute_table);
+      interfaces_count,
+      interfaces,
+      fields_count,
+      fields,
+      methods_count,
+      methods,
+      attributes_count,
+      attributes);
   }
 
-  public byte[] toByteArr(int length, byte[] ...data) {
+  protected byte[] toByteArr(int length, byte[] ...data) {
     byte[] result = new byte[length];
     int counter = 0;
 
@@ -121,21 +124,21 @@ public class ClassFile {
   }
 
   private int getFileSize() {
-    return magic_number.length +
+    return magic.length +
       minor_version.length +
       major_version.length +
-      constant_pool_size.length + 
+      constant_pool_count.length + 
       constant_pool.length + 
       access_flags.length + 
       this_class.length + 
       super_class.length + 
-      interface_table_size.length +
-      interface_table.length +
-      field_table_size.length + 
-      field_table.length + 
-      method_table_size.length + 
-      method_table.length +
-      attribute_table_size.length + 
-      attribute_table.length;
+      interfaces_count.length +
+      interfaces.length +
+      fields_count.length + 
+      fields.length + 
+      methods_count.length + 
+      methods.length +
+      attributes_count.length + 
+      attributes.length;
   }
 }
