@@ -43,7 +43,7 @@ public class ClassFile {
     this.major_version = ByteConvert.hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
     // Constant Pool
-    this.constant_pool_count = ByteConvert.intToBytes(2, constant_pool.size() + 1);
+    this.constant_pool_count = ByteConvert.intToBytes(2, constant_pool.size());
     this.constant_pool = constant_pool.getData();
 
     // General Info

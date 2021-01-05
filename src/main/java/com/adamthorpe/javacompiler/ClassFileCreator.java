@@ -82,11 +82,11 @@ public class ClassFileCreator {
   protected String resolveType(Type type) {
     if (type.isPrimitiveType()) {
       switch(type.asString()) {
-        case "void":
-          return "()V";
         default:
           return type.asString(); //TEMP
       }
+    }else if (type.isVoidType()) {
+      return "()V";
     } else if (type.isArrayType()) {
       return "[" + resolveType(type.asArrayType().getComponentType()); //WIP
     } else {
