@@ -1,8 +1,5 @@
 package com.adamthorpe.javacompiler;
 
-import java.util.List;
-
-import com.adamthorpe.javacompiler.Types.Attributes.Attributes_info;
 import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
 import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.FieldOrMethodTable;
@@ -41,16 +38,16 @@ public class ClassFile {
   ) {
 
     // Version Info
-    this.magic = hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
-    this.minor_version = hexToByteArray("0000"); //Minor version is 0
-    this.major_version = hexToByteArray("0037"); //JavaSE version 11 = Hex 37
+    this.magic = ByteConvert.hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
+    this.minor_version = ByteConvert.hexToByteArray("0000"); //Minor version is 0
+    this.major_version = ByteConvert.hexToByteArray("0037"); //JavaSE version 11 = Hex 37
 
     // Constant Pool
     this.constant_pool_count = ByteConvert.intToBytes(2, constant_pool.size() + 1);
     this.constant_pool = constant_pool.getData();
 
     // General Info
-    this.access_flags = hexToByteArray("0021");
+    this.access_flags = ByteConvert.hexToByteArray("0021");
     this.this_class = ByteConvert.intToBytes(2, this_class);
     this.super_class = ByteConvert.intToBytes(2, super_class);
 
@@ -71,29 +68,9 @@ public class ClassFile {
     this.attributes = attribute_table.getData();
   }
 
-  protected static byte[] hexToByteArray(String hex) {
-    int len = hex.length();
 
-    byte[] out = new byte[ len/2 ];
-
-    for (int i=0; i<(len/2); i++) {
-      int d1 = getDigit(hex.charAt(i*2));
-      int d2 = getDigit(hex.charAt(i*2 + 1));
-
-      out[i] = (byte) ((d1 << 4) + d2);
-    }
-
-    return out;
-  }
-
-  protected static int getDigit(char letter) {
-    return Character.digit(letter, 16);
-  }
-
-
-  public byte[] toByteArr() {
-    return toByteArr(getFileSize(),
-      magic,
+  public byte[] getData() {
+    return ByteConvert.toByteArr(magic,
       minor_version,
       major_version,
       constant_pool_count,
@@ -111,19 +88,7 @@ public class ClassFile {
       attributes);
   }
 
-  protected byte[] toByteArr(int length, byte[] ...data) {
-    byte[] result = new byte[length];
-    int counter = 0;
-
-    for(byte[] d : data) {
-      System.arraycopy(d, 0, result, counter, d.length);
-      counter += d.length;
-    }
-
-    return result;
-  }
-
-  private int getFileSize() {
+  public int getLength() {
     return magic.length +
       minor_version.length +
       major_version.length +

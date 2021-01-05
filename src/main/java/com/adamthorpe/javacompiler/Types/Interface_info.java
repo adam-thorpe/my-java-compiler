@@ -12,7 +12,7 @@ public class Interface_info implements ByteData {
 
   @Override
   public int getLength() {
-    return 2;
+    return name_index.length;
   }
 
   @Override

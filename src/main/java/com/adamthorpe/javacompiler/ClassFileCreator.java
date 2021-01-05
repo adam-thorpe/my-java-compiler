@@ -1,10 +1,12 @@
 package com.adamthorpe.javacompiler;
 
-import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
-import com.adamthorpe.javacompiler.Types.Field_or_Method_info;
-import com.adamthorpe.javacompiler.Types.Attributes.Attributes_info;
+import com.adamthorpe.javacompiler.Types.Code.ByteCode;
+import com.adamthorpe.javacompiler.Types.Code.OpCode;
 import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
 import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.FieldOrMethodTable;
@@ -23,8 +25,9 @@ public class ClassFileCreator {
   private ConstantPool constantPool;
   private int thisClass;
   private int superClass;
-  
-  byte[] interfacesTable = new byte[0];
+  private String className;
+
+  byte[] interfacesTable = new byte[0]; // to do
   FieldOrMethodTable fieldsTable;
   FieldOrMethodTable methodsTable;
   AttributesTable attributesTable;
@@ -44,15 +47,31 @@ public class ClassFileCreator {
 
     createClassInfo(classDeclaration);
     createMethodInfo(methodDeclarations);
+    createAttributes();
 
-    ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable, attributesTable);
-    
-    //print class file
-    for (byte b : classFile.toByteArr()) {
+    ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable,
+        attributesTable);
+
+    // print class file
+    for (byte b : classFile.getData()) {
       String st = String.format("%02X", b);
       System.out.print(st);
     }
     System.out.println();
+
+    outputToFile(classFile.getData());
+  }
+
+  protected void outputToFile(byte[] data) {
+    try {
+      OutputStream out = new FileOutputStream(className+".class");
+      out.write(data);
+      out.close();
+    } catch (IOException e) {
+      System.out.println("Could not create file");
+
+    }
+    System.out.println("Class file compiled!");
   }
 
   /**
@@ -61,7 +80,6 @@ public class ClassFileCreator {
    * @return Resolved type
    */
   protected String resolveType(Type type) {
-    
     if (type.isPrimitiveType()) {
       switch(type.asString()) {
         case "void":
@@ -79,43 +97,57 @@ public class ClassFileCreator {
   protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
     // Define this class
     thisClass = constantPool.addClass_info(classDeclaration.getNameAsString());
+    className = classDeclaration.getNameAsString();
 
     if (classDeclaration.getExtendedTypes().isEmpty()) {
       // Add default superclass "Object"
       superClass = constantPool.addClass_info("java/lang/Object");
     } else {
       for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
-        System.out.println("Super Class Name: " + resolveType(superClassType));
-
+        // System.out.println("Super Class Name: " + resolveType(superClassType));
         // TO DO
       }
     }
-
   }
 
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
-    // Default Constructor
-    methodsTable.insert("<init>", "()V", generateAttributes());
+    createConstructor();
 
     for (MethodDeclaration md : methodDeclarations) {
 
       //WIP
       for (Parameter param : md.getParameters()) {
-        System.out.println("Method param: " + param.getName());
-        System.out.println("Method param type : " + resolveType(param.getType()));
+        // System.out.println("Method param: " + param.getName());
+        // System.out.println("Method param type : " + resolveType(param.getType()));
       }
 
+      //WIP code
+      ByteCode code = new ByteCode(constantPool);
+      code.addInstruction(OpCode.return_);
 
-      //Generate attributes
-      
-
-      methodsTable.insert(md.getName().asString(), resolveType(md.getType()), generateAttributes());
+      AttributesTable attributes = new AttributesTable(constantPool);
+      attributes.addCodeAttribute(code);
+      methodsTable.insert(md.getName().asString(), resolveType(md.getType()), attributes);
     }
   }
 
-  protected AttributesTable generateAttributes() {
+  // Create default constructor
+  protected void createConstructor() {
+    // Generate code
+    ByteCode code = new ByteCode(constantPool);
+    code.addInstruction(OpCode.aload_0);
+    code.addInstruction(OpCode.invokespecial, 
+      constantPool.addMethod_info("java/lang/Object", "<init>", "()V")
+    );
+    code.addInstruction(OpCode.return_);
+
+    // Create attributes
     AttributesTable attributes = new AttributesTable(constantPool);
-    return attributes;
+    attributes.addCodeAttribute(code);
+    methodsTable.insert("<init>", "()V", attributes);
   }
 
+  protected void createAttributes() {
+    attributesTable.addSourceFileAttribute(className + ".java");
+  }
 }

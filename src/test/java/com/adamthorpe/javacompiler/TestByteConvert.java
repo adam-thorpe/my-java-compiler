@@ -38,7 +38,7 @@ public class TestByteConvert {
 
   @Test
   public void testHexToByte() {
-    assertArrayEquals(expected, ClassFile.hexToByteArray(input));
+    assertArrayEquals(expected, ByteConvert.hexToByteArray(input));
   }
 
   public void testHexToByteShouldFail() {
