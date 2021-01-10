@@ -14,25 +14,9 @@ public class App {
     try {
       // Parse arguments
       String fileToCompile = parseArguments(args);
-      // configureJavaParser();
 
-      //test
-      CombinedTypeSolver ts = new CombinedTypeSolver();
-      ts.add(new ReflectionTypeSolver());
-      JavaSymbolSolver jss = new JavaSymbolSolver(ts);
-      StaticJavaParser.getConfiguration().setSymbolResolver(jss);
-      //
-
+      configureJavaParser();
       CompilationUnit cu = StaticJavaParser.parse(new File(fileToCompile));
-
-      // cu.findAll(AssignExpr.class).forEach(ae -> {
-      //   ResolvedType resolvedType = ae.calculateResolvedType();
-      //   System.out.println(ae.toString() + " is a: " + resolvedType.describe());
-      // });
-
-      // for (TypeDeclaration typeDeclaration : cu.getTypes()) {
-      //   JavaParserFacade.get(ts).
-			// }
 
       ClassFileCreator classFileCreator = new ClassFileCreator(cu);
       classFileCreator.parse();

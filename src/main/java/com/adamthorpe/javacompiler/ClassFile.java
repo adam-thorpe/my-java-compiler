@@ -5,49 +5,48 @@ import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.FieldOrMethodTable;
 
 public class ClassFile {
-  private byte[] magic; //u4
-  private byte[] minor_version; //u2
+  private byte[] magic; // u4
+  private byte[] minor_version; // u2
   private byte[] major_version; // u2
 
-  private byte[] constant_pool_count; //u2
-  private byte[] constant_pool; //cp_info
+  private byte[] constant_pool_count; // u2
+  private byte[] constant_pool; // cp_info
 
-  private byte[] access_flags; //u2
-  private byte[] this_class; //u2
-  private byte[] super_class; //u2
+  private byte[] access_flags; // u2
+  private byte[] this_class; // u2
+  private byte[] super_class; // u2
 
-  private byte[] interfaces_count; //u2
-  private byte[] interfaces; //u2
+  private byte[] interfaces_count; // u2
+  private byte[] interfaces; // u2
 
-  private byte[] fields_count; //u2
-  private byte[] fields; //fields_info
+  private byte[] fields_count; // u2
+  private byte[] fields; // fields_info
 
-  private byte[] methods_count; //u2
-  private byte[] methods; //methods_info
+  private byte[] methods_count; // u2
+  private byte[] methods; // methods_info
 
-  private byte[] attributes_count; //u2
-  private byte[] attributes; //attributes_info
+  private byte[] attributes_count; // u2
+  private byte[] attributes; // attributes_info
 
-  public ClassFile(ConstantPool constant_pool, 
-    int this_class, 
-    int super_class,
-    byte[] interface_table, 
-    FieldOrMethodTable field_table, 
-    FieldOrMethodTable method_table, 
-    AttributesTable attribute_table
-  ) {
+  public ClassFile(ConstantPool constant_pool, int this_class, int super_class, byte[] interface_table,
+      FieldOrMethodTable field_table, FieldOrMethodTable method_table, AttributesTable attribute_table) {
 
     // Version Info
-    this.magic = ByteConvert.hexToByteArray("CAFEBABE"); //Magic Number used for every java class file
-    this.minor_version = ByteConvert.hexToByteArray("0000"); //Minor version is 0
-    this.major_version = ByteConvert.hexToByteArray("0037"); //JavaSE version 11 = Hex 37
+    try {
+      this.magic = ByteConvert.hexToByteArray("CAFEBABE"); // Magic Number used for every java class file
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
+
+    this.minor_version = ByteConvert.intToBytes(2, 0); // Minor version is always 0
+    this.major_version = ByteConvert.intToBytes(2, 55); // JavaSE version 11 = 55
 
     // Constant Pool
     this.constant_pool_count = ByteConvert.intToBytes(2, constant_pool.size());
     this.constant_pool = constant_pool.getData();
 
     // General Info
-    this.access_flags = ByteConvert.hexToByteArray("0021");
+    this.access_flags = ByteConvert.intToBytes(2, 21); // public, super
     this.this_class = ByteConvert.intToBytes(2, this_class);
     this.super_class = ByteConvert.intToBytes(2, super_class);
 

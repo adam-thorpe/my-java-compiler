@@ -2,12 +2,24 @@ package com.adamthorpe.javacompiler;
 
 public class ByteConvert {
 
-  public static byte[] hexToByteArray(String hex) {
-    int len = hex.length();
+  /**
+   * Converts a hex string into an array of bytes.
+   * 
+   * @param hex         the input hex stream
+   * @return            a byte array
+   * @throws Exception  if <code>hex</code> contains an invalid character
+   */
+  public static byte[] hexToByteArray(String hex) throws Exception {
 
-    byte[] out = new byte[ len/2 ];
+    // If the input hex has an odd number of characters, append a 0 to the front
+    if(hex.length()%2 !=0) {
+      hex="0"+hex;
+    }
 
-    for (int i=0; i<(len/2); i++) {
+    byte[] out = new byte[ hex.length()/2 ];
+
+    for (int i=0; i<(hex.length()/2); i++) {
+      // Get the next two characters
       int d1 = getDigit(hex.charAt(i*2));
       int d2 = getDigit(hex.charAt(i*2 + 1));
 
@@ -17,10 +29,31 @@ public class ByteConvert {
     return out;
   }
 
-  protected static int getDigit(char letter) {
-    return Character.digit(letter, 16);
+  /**
+   * Converts a hex character into an integer value.
+   * Ranges from 0 to 127 and -128 to -1.
+   * 
+   * @param letter      the hex character
+   * @return            an integer representation of <code>letter</code>
+   * @throws Exception  if the <code>letter</code> if not a valid hex character
+   */
+  protected static int getDigit(char letter) throws Exception {
+    int digit = Character.digit(letter, 16);
+    if (digit == -1) {
+      throw new Exception();
+    } else {
+      return digit;
+    }
   }
 
+  /**
+   * Converts an integer into a byte representation, conforming to a byte <code>length</code>.
+   * It does this by padding any extra bytes.
+   * 
+   * @param length the length of the new array
+   * @param data the data being converted into bytes
+   * @return a byte array
+   */
   public static byte[] intToBytes(int length, int data) {
     byte[] output = new byte[length];
 
@@ -31,15 +64,27 @@ public class ByteConvert {
     return output;
   }
 
+
+  /**
+   * Converts one or many byte arrays into a single byte array.
+   * It does this by copying each element into a new array.
+   * 
+   * @param data one or more byte arrays
+   * @return a single byte array
+   */
   public static byte[] toByteArr(byte[] ...data) {
+
+    // Calculate the length of the new array
     int length=0;
     for(byte[] d: data) {
       length+=d.length;
     }
 
+    // Create new array
     byte[] output = new byte[length];
     int counter = 0;
 
+    // Copy elements into it
     for(byte[] d : data) {
       System.arraycopy(d, 0, output, counter, d.length);
       counter += d.length;
