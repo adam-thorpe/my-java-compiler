@@ -10,14 +10,9 @@ import org.junit.jupiter.api.BeforeAll;
  */
 public class HelloWorldTest {
 
-  @BeforeAll
-  public void loadHelloWorld() {
-    String args[] = {"/bin/HelloWorld/HelloWorld.java"};
-    App.main(args);
-  }
-
-  @Test
-  public void shouldAnswerWithTrue() {
-    assertTrue( true );
-  }
+  // @BeforeAll
+  // public void loadHelloWorld() {
+  //   String args[] = {"/bin/HelloWorld/HelloWorld.java"};
+  //   App.main(args);
+  // }
 }

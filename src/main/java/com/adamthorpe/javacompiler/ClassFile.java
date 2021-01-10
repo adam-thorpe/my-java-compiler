@@ -29,14 +29,11 @@ public class ClassFile {
   private byte[] attributes; // attributes_info
 
   public ClassFile(ConstantPool constant_pool, int this_class, int super_class, byte[] interface_table,
-      FieldOrMethodTable field_table, FieldOrMethodTable method_table, AttributesTable attribute_table) {
+      FieldOrMethodTable field_table, FieldOrMethodTable method_table, AttributesTable attribute_table)
+      throws Exception {
 
     // Version Info
-    try {
-      this.magic = ByteConvert.hexToByteArray("CAFEBABE"); // Magic Number used for every java class file
-    } catch (Exception e) {
-      e.printStackTrace();
-    } 
+    this.magic = ByteConvert.hexToByteArray("CAFEBABE"); // Magic Number used for every java class file
 
     this.minor_version = ByteConvert.intToBytes(2, 0); // Minor version is always 0
     this.major_version = ByteConvert.intToBytes(2, 55); // JavaSE version 11 = 55
@@ -46,7 +43,7 @@ public class ClassFile {
     this.constant_pool = constant_pool.getData();
 
     // General Info
-    this.access_flags = ByteConvert.intToBytes(2, 21); // public, super
+    this.access_flags = ByteConvert.hexToByteArray("0021"); // public, super
     this.this_class = ByteConvert.intToBytes(2, this_class);
     this.super_class = ByteConvert.intToBytes(2, super_class);
 
@@ -87,22 +84,22 @@ public class ClassFile {
       attributes);
   }
 
-  public int getLength() {
-    return magic.length +
-      minor_version.length +
-      major_version.length +
-      constant_pool_count.length + 
-      constant_pool.length + 
-      access_flags.length + 
-      this_class.length + 
-      super_class.length + 
-      interfaces_count.length +
-      interfaces.length +
-      fields_count.length + 
-      fields.length + 
-      methods_count.length + 
-      methods.length +
-      attributes_count.length + 
-      attributes.length;
-  }
+  // public int getLength() {
+  //   return magic.length +
+  //     minor_version.length +
+  //     major_version.length +
+  //     constant_pool_count.length + 
+  //     constant_pool.length + 
+  //     access_flags.length + 
+  //     this_class.length + 
+  //     super_class.length + 
+  //     interfaces_count.length +
+  //     interfaces.length +
+  //     fields_count.length + 
+  //     fields.length + 
+  //     methods_count.length + 
+  //     methods.length +
+  //     attributes_count.length + 
+  //     attributes.length;
+  // }
 }

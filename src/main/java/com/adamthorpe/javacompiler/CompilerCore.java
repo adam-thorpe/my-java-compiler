@@ -19,22 +19,26 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 
-public class ClassFileCreator {
+public class CompilerCore {
 
   private CompilationUnit cu;
   private ConstantPool constantPool;
   private int thisClass;
   private int superClass;
   private String className;
+  private String filePath;
 
   byte[] interfacesTable = new byte[0]; // to do
   FieldOrMethodTable fieldsTable;
   FieldOrMethodTable methodsTable;
   AttributesTable attributesTable;
 
-  public ClassFileCreator(CompilationUnit cu) {
+  public CompilerCore(CompilationUnit cu, String filePath) {
     this.cu = cu;
     this.constantPool = new ConstantPool();
+    this.filePath = filePath;
+
+    System.out.println(filePath);
 
     this.fieldsTable = new FieldOrMethodTable(constantPool);
     this.methodsTable = new FieldOrMethodTable(constantPool);
@@ -49,29 +53,32 @@ public class ClassFileCreator {
     createMethodInfo(methodDeclarations);
     createAttributes();
 
-    ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable,
-        attributesTable);
+    // Create the class file
+    try {
+      ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable,
+      attributesTable);
 
-    // print class file
-    for (byte b : classFile.getData()) {
-      String st = String.format("%02X", b);
-      System.out.print(st);
+      // Write out to file
+      outputToFile(classFile.getData());
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    System.out.println();
-
-    outputToFile(classFile.getData());
   }
 
+  /**
+   * Writes an array of bytes to file
+   * 
+   * @param data An array of bytes
+   */
   protected void outputToFile(byte[] data) {
     try {
-      OutputStream out = new FileOutputStream(className+".class");
+      OutputStream out = new FileOutputStream(filePath + "/" + className+".class");
       out.write(data);
       out.close();
+      System.out.println("Compilation successful");
     } catch (IOException e) {
-      System.out.println("Could not create file");
-
+      e.printStackTrace();
     }
-    System.out.println("Class file compiled!");
   }
 
   /**
