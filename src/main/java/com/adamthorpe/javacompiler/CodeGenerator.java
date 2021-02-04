@@ -55,7 +55,7 @@ public class CodeGenerator {
       // Get args
       List<String> args = new ArrayList<>();
       methodExpr.getArguments().forEach(arg -> 
-        args.add(evaluateExpression(arg))
+        args.add(Util.generateType(evaluateExpression(arg)))
       );
 
       // Get return type

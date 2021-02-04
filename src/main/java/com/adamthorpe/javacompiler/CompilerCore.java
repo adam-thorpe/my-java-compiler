@@ -3,6 +3,8 @@ package com.adamthorpe.javacompiler;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
@@ -111,10 +113,15 @@ public class CompilerCore {
 
     for (MethodDeclaration md : methodDeclarations) {
 
-      // WIP
+      int accessFlags=0;
+      // Check accessflags
+      if(md.isPublic()) accessFlags+=Modifier.PUBLIC;
+      if(md.isStatic()) accessFlags+=Modifier.STATIC;
+
+      // Get list of parameters
+      List<String> paramTypes = new ArrayList<>();
       for (Parameter param : md.getParameters()) {
-        // System.out.println("Method param: " + param.getName());
-        // System.out.println("Method param type : " + resolveType(param.getType()));
+        paramTypes.add(Util.resolveType(param.getType()));
       }
 
       ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get());
@@ -122,7 +129,7 @@ public class CompilerCore {
       AttributesTable attributes = new AttributesTable(constantPool);
       attributes.addCodeAttribute(code);
 
-      methodsTable.insert(md.getName().asString(), Util.createTypeInfo(Util.resolveType(md.getType())), attributes);
+      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(Util.resolveType(md.getType()), paramTypes), attributes);
     }
   }
 
@@ -142,7 +149,7 @@ public class CompilerCore {
     // Create attributes
     AttributesTable attributes = new AttributesTable(constantPool);
     attributes.addCodeAttribute(code);
-    methodsTable.insert("<init>", "()V", attributes);
+    methodsTable.insert("<init>", Modifier.PUBLIC,  "()V", attributes);
   }
 
   protected void createAttributes() {

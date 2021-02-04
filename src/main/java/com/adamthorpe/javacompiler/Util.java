@@ -3,6 +3,7 @@ package com.adamthorpe.javacompiler;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.types.ResolvedType;
 
@@ -17,8 +18,11 @@ public class Util {
   public static String resolveType(Type type) {
     if (type.isVoidType()) {
       return "V";
+    } else if (type.isArrayType()) {
+      ArrayType arrType = type.asArrayType();
+      return "["+resolveType(arrType.getElementType());
     } else {
-      return "L"+format(type.resolve().describe());
+      return "L"+format(type.resolve().describe())+";";
     }
   }
 
@@ -26,8 +30,12 @@ public class Util {
     if (type.isVoid()) {
       return "V";
     } else {
-      return "L"+format(type.describe());
+      return "L"+format(type.describe())+";";
     }
+  }
+
+  public static String generateType(String type) {
+    return "L"+type+";";
   }
 
 
@@ -43,7 +51,7 @@ public class Util {
   public static String createTypeInfo(String returnType, List<String> argTypes) {
     String string = "(";
     for(String arg : argTypes) {
-      string += arg + ";";
+      string += arg;
     }
     return string + ")" + returnType;
   }

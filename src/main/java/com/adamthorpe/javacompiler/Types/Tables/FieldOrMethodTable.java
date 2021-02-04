@@ -19,10 +19,10 @@ public class FieldOrMethodTable extends DataTable<Field_or_Method_info> {
    * @param attributes An array of attributes
    * @return Index of the element in the table
    */
-  public int insert(String name, String descriptor, AttributesTable attributes) {
+  public int insert(String name, int accessFlags, String descriptor, AttributesTable attributes) {
     int name_index = constantPool.addUtf8_info(name);
     int descriptor_index = constantPool.addUtf8_info(descriptor);
 
-    return insert(new Field_or_Method_info(name_index, descriptor_index, attributes));
+    return insert(new Field_or_Method_info(name_index, accessFlags, descriptor_index, attributes));
   }
 }

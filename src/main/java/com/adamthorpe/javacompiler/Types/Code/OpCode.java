@@ -9,7 +9,7 @@ public enum OpCode {
   invokespecial(183);
 
   private final int opCode;
-
+   
   private OpCode(int opCode) {
     this.opCode = opCode;
   }

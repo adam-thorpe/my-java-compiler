@@ -10,8 +10,8 @@ public class Field_or_Method_info implements ByteData {
   protected byte[] attributes_count; //u2
   protected byte[] attributes; //attr_count
 
-  public Field_or_Method_info(int name_index, int descriptor_index, AttributesTable attributes) {
-    this.access_flags = ByteConvert.intToBytes(2, 1); //Always public
+  public Field_or_Method_info(int name_index, int accessFlags, int descriptor_index, AttributesTable attributes) {
+    this.access_flags = ByteConvert.intToBytes(2, accessFlags); //Always public
     this.name_index = ByteConvert.intToBytes(2, name_index);
     this.descriptor_index = ByteConvert.intToBytes(2, descriptor_index);
 
