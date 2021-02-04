@@ -1,4 +1,4 @@
-package com.adamthorpe.javacompiler;
+package com.adamthorpe.javacompiler.TestCases;
 
 import static org.junit.Assert.assertTrue;
 

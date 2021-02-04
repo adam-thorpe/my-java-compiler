@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.Test;
 
-public class TestByteConvert {
+public class ByteConvertTest {
   @Test
   public void testHexToByte() {
     try {
@@ -38,6 +38,7 @@ public class TestByteConvert {
     assertArrayEquals(new byte[]{127}, ByteConvert.intToBytes(1, 127));
     assertArrayEquals(new byte[]{-128}, ByteConvert.intToBytes(1, 128));
     assertArrayEquals(new byte[]{-1}, ByteConvert.intToBytes(1, 255));
+    assertArrayEquals(new byte[]{1, 0}, ByteConvert.intToBytes(2, 256));
   }
 
   @Test

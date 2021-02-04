@@ -29,7 +29,7 @@ public class Code_attribute extends Attributes_info {
     this.attributes = new byte[0];
     this.attributes_count = ByteConvert.intToBytes(2, attributes.length);
 
-    this.max_stack = ByteConvert.intToBytes(2, 1); //WIP
+    this.max_stack = ByteConvert.intToBytes(2, 2); //WIP
     this.max_locals = ByteConvert.intToBytes(2, 1); //WIP
 
     setAttributeLength(getThisLength());

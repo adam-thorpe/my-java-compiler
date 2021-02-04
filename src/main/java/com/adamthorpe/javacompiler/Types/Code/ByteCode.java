@@ -16,7 +16,7 @@ public class ByteCode extends DataTable<Instruction> {
     this.add(new Instruction(op));
   }
 
-  public void addInstruction(OpCode op, int arg) {
-    this.add(new Instruction(op, arg));
+  public void addInstruction(OpCode op, int bytes, int cpIndex) {
+    this.add(new Instruction(op, bytes, cpIndex));
   }
 }

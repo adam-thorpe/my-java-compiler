@@ -13,10 +13,10 @@ public class Instruction implements ByteData {
     this.args = new byte[0];
   }
 
-  public Instruction(OpCode op, int cpIndex) {
+  public Instruction(OpCode op, int bytes, int cpIndex) {
     this(op);
 
-    byte[] arg = ByteConvert.intToBytes(2, cpIndex);
+    byte[] arg = ByteConvert.intToBytes(bytes, cpIndex);
     this.args = arg;
   }
 

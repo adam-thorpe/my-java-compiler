@@ -1,9 +1,12 @@
-package com.adamthorpe.javacompiler;
+package com.adamthorpe.javacompiler.TestCases;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Modifier;
+
+import com.adamthorpe.javacompiler.App;
+import com.adamthorpe.javacompiler.ClassTest;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

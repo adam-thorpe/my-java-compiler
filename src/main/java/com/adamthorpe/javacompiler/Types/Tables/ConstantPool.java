@@ -1,11 +1,7 @@
 package com.adamthorpe.javacompiler.Types.Tables;
 
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT;
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT_Class_info;
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT_DUMMY;
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT_Methodref_info;
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT_NameAndType_info;
-import com.adamthorpe.javacompiler.Types.ConstantPool.CONSTANT_Utf8_info;
+import com.adamthorpe.javacompiler.Util;
+import com.adamthorpe.javacompiler.Types.ConstantPool.*;
 
 public class ConstantPool extends DataTable<CONSTANT> {
   static final long serialVersionUID = 1L;
@@ -17,6 +13,11 @@ public class ConstantPool extends DataTable<CONSTANT> {
 
   public int addUtf8_info(String data) {
     return insert(new CONSTANT_Utf8_info(data));
+  }
+
+  public int addString_info(String data) {
+    int string_index = addUtf8_info(data);
+    return insert(new CONSTANT_String_info(string_index));
   }
 
   public int addClass_info(String name) {
@@ -34,6 +35,12 @@ public class ConstantPool extends DataTable<CONSTANT> {
     int class_index = addClass_info(className);
     int name_and_type_index = addNameAndType_info(methodName, descriptor);
     return insert(new CONSTANT_Methodref_info(class_index, name_and_type_index));
+  }
+
+  public int addField_info(String className, String fieldName, String descriptor) {
+    int class_index = addClass_info(className);
+    int name_and_type_index = addNameAndType_info(fieldName, descriptor);
+    return insert(new CONSTANT_Fieldref_info(class_index, name_and_type_index));
   }
 
   /**

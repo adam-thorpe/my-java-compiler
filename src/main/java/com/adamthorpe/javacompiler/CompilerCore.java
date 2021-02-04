@@ -17,7 +17,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.Type;
 
 public class CompilerCore {
 
@@ -38,8 +37,6 @@ public class CompilerCore {
     this.constantPool = new ConstantPool();
     this.filePath = filePath;
 
-    System.out.println(filePath);
-
     this.fieldsTable = new FieldOrMethodTable(constantPool);
     this.methodsTable = new FieldOrMethodTable(constantPool);
     this.attributesTable = new AttributesTable(constantPool);
@@ -55,11 +52,11 @@ public class CompilerCore {
 
     // Create the class file
     try {
-      ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable, methodsTable,
-      attributesTable);
+      ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable,
+          methodsTable, attributesTable);
 
       // Write out to file
-      outputToFile(classFile.getData());
+      outputToFile(classFile.getData(), filePath + "/" + className + ".class");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -70,37 +67,24 @@ public class CompilerCore {
    * 
    * @param data An array of bytes
    */
-  protected void outputToFile(byte[] data) {
+  protected void outputToFile(byte[] data, String destination) {
     try {
-      OutputStream out = new FileOutputStream(filePath + "/" + className+".class");
+      OutputStream out = new FileOutputStream(destination);
       out.write(data);
       out.close();
-      System.out.println("Compilation successful");
+      System.out.println("Class compiled successfully to " + destination);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  /**
-   * Creates a method description from type information
-   * @param type Raw type
-   * @return Resolved type
-   */
-  protected String resolveType(Type type) {
-    if (type.isPrimitiveType()) {
-      switch(type.asString()) {
-        default:
-          return type.asString(); //TEMP
-      }
-    }else if (type.isVoidType()) {
-      return "()V";
-    } else if (type.isArrayType()) {
-      return "[" + resolveType(type.asArrayType().getComponentType()); //WIP
-    } else {
-      return type.resolve().describe(); //TEMP
-    }
-  }
+  
 
+  /**
+   * Creates the data for the class
+   * 
+   * @param classDeclaration info about the class
+   */
   protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
     // Define this class
     thisClass = constantPool.addClass_info(classDeclaration.getNameAsString());
@@ -117,34 +101,41 @@ public class CompilerCore {
     }
   }
 
+  /**
+   * Creates the data for each declared method
+   * 
+   * @param methodDeclarations the method declarations
+   */
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
     createConstructor();
 
     for (MethodDeclaration md : methodDeclarations) {
 
-      //WIP
+      // WIP
       for (Parameter param : md.getParameters()) {
         // System.out.println("Method param: " + param.getName());
         // System.out.println("Method param type : " + resolveType(param.getType()));
       }
 
-      //WIP code
-      ByteCode code = new ByteCode(constantPool);
-      code.addInstruction(OpCode.return_);
+      ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get());
 
       AttributesTable attributes = new AttributesTable(constantPool);
       attributes.addCodeAttribute(code);
-      methodsTable.insert(md.getName().asString(), resolveType(md.getType()), attributes);
+
+      methodsTable.insert(md.getName().asString(), Util.createTypeInfo(Util.resolveType(md.getType())), attributes);
     }
   }
 
-  // Create default constructor
+
+  /**
+   * Creates the data for a default constructor
+   */
   protected void createConstructor() {
     // Generate code
     ByteCode code = new ByteCode(constantPool);
     code.addInstruction(OpCode.aload_0);
     code.addInstruction(OpCode.invokespecial, 
-      constantPool.addMethod_info("java/lang/Object", "<init>", "()V")
+      2, constantPool.addMethod_info("java/lang/Object", "<init>", "()V")
     );
     code.addInstruction(OpCode.return_);
 
