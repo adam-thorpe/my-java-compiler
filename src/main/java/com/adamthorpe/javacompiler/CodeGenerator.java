@@ -86,7 +86,7 @@ public class CodeGenerator {
         2, constantPool.addField_info(scope, fieldName, fieldType)
       );
 
-      return Util.format(fieldExpr.resolve().getType().describe());
+      return Util.formatReferenceType(fieldExpr.resolve().getType().describe());
 
     /**
      * String literal
@@ -107,7 +107,7 @@ public class CodeGenerator {
      *     variable1
      */
     } else if (expr.isNameExpr()) {
-      return Util.format(expr.calculateResolvedType().describe());
+      return Util.formatReferenceType(expr.calculateResolvedType().describe());
 
     /**
      * Unknown

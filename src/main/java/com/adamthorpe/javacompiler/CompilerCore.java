@@ -121,7 +121,7 @@ public class CompilerCore {
       // Get list of parameters
       List<String> paramTypes = new ArrayList<>();
       for (Parameter param : md.getParameters()) {
-        paramTypes.add(Util.resolveType(param.getType()));
+        paramTypes.add(Util.generateType(param.getType()));
       }
 
       ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get());
@@ -129,7 +129,7 @@ public class CompilerCore {
       AttributesTable attributes = new AttributesTable(constantPool);
       attributes.addCodeAttribute(code);
 
-      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(Util.resolveType(md.getType()), paramTypes), attributes);
+      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(Util.generateType(md.getType()), paramTypes), attributes);
     }
   }
 
