@@ -65,13 +65,13 @@ public class UtilTest {
     }
   }
 
-  @Test
-  public void testGenerateType() {
-    assertEquals("V", Util.generateType(voidType));
-    assertEquals("I", Util.generateType(intType));
-    assertEquals("Ljava/lang/String;", Util.generateType(stringReferenceType));
-    assertEquals("[I", Util.generateType(intArrType));
-    assertEquals("[Ljava/lang/Object;", Util.generateType(objectArrReferenceType));
-  }
+  // @Test
+  // public void testGenerateType() {
+  //   assertEquals("V", Util.generateType(voidType));
+  //   assertEquals("I", Util.generateType(intType));
+  //   assertEquals("Ljava/lang/String;", Util.generateType(stringReferenceType));
+  //   assertEquals("[I", Util.generateType(intArrType));
+  //   assertEquals("[Ljava/lang/Object;", Util.generateType(objectArrReferenceType));
+  // }
   
 }

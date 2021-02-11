@@ -3,6 +3,7 @@ package com.adamthorpe.javacompiler.TestCases;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
@@ -16,7 +17,7 @@ public class TwoMethodsTest extends ClassTest {
   public TwoMethodsTest() {
     super("bin/TwoMethods", "TwoMethods");
   }
-  
+
   @BeforeClass
   public static void compileClass() {
     assertDoesNotThrow(() -> App.main(new String[] { "bin/TwoMethods/TwoMethods.java" }));
@@ -31,9 +32,7 @@ public class TwoMethodsTest extends ClassTest {
   public void testConstructor() {
     assertEquals(1, thisClass.getConstructors().length);
 
-    assertDoesNotThrow(() -> 
-      testConstructor(thisClass.getConstructor(), Modifier.PUBLIC)
-    );
+    assertDoesNotThrow(() -> testConstructor(thisClass.getConstructor(), Modifier.PUBLIC));
   }
 
   @Test
@@ -41,13 +40,14 @@ public class TwoMethodsTest extends ClassTest {
     assertEquals(2, thisClass.getDeclaredMethods().length);
 
     // Test method A
-    assertDoesNotThrow(() -> 
-      testMethod(thisClass.getMethod("A", int.class), Modifier.PUBLIC, int.class)
-    );
+    assertDoesNotThrow(() -> testMethod(thisClass.getMethod("A", int.class), Modifier.PUBLIC, int.class));
 
-    int input =5;
+    int input = 5;
     assertDoesNotThrow(() -> 
-      assertEquals(input, thisClass.getMethod("A", int.class).invoke(thisClass, input))
+      assertEquals(input, thisClass.getMethod("A", int.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}), 
+        input
+      ))
     );
 
     // Test method B
@@ -56,7 +56,9 @@ public class TwoMethodsTest extends ClassTest {
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals("Hello", thisClass.getMethod("B").invoke(thisClass))
+      assertEquals("Hello", thisClass.getMethod("B").invoke(
+        thisClass.getConstructor().newInstance(new Object[] {})
+      ))
     );
   }
 }

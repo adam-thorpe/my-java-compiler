@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.adamthorpe.javacompiler.Types.Type;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
 import com.adamthorpe.javacompiler.Types.Code.OpCode;
 import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
@@ -119,17 +120,17 @@ public class CompilerCore {
       if(md.isStatic()) accessFlags+=Modifier.STATIC;
 
       // Get list of parameters
-      List<String> paramTypes = new ArrayList<>();
+      List<Type> paramTypes = new ArrayList<>();
       for (Parameter param : md.getParameters()) {
-        paramTypes.add(Util.generateType(param.getType()));
+        paramTypes.add(new Type(param.getType()));
       }
 
-      ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get());
+      ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get(), md.getParameters());
 
       AttributesTable attributes = new AttributesTable(constantPool);
       attributes.addCodeAttribute(code);
 
-      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(Util.generateType(md.getType()), paramTypes), attributes);
+      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(new Type(md.getType()), paramTypes), attributes);
     }
   }
 

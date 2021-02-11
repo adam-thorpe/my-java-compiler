@@ -2,15 +2,16 @@ package com.adamthorpe.javacompiler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.adamthorpe.javacompiler.Types.Type;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
-import com.adamthorpe.javacompiler.Types.Code.Instruction;
 import com.adamthorpe.javacompiler.Types.Code.OpCode;
 import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 
@@ -18,27 +19,42 @@ public class CodeGenerator {
 
   protected ConstantPool constantPool;
   protected ByteCode code;
+  protected boolean hasReturn=false; //TEMP
+  protected List<Parameter> params;
 
   public CodeGenerator(ConstantPool constantPool) {
     this.constantPool = constantPool;
   }
 
-  public ByteCode run(BlockStmt block) {
+  public ByteCode run(BlockStmt block, List<Parameter> parameters) {
     code = new ByteCode(constantPool);
+    params=parameters;
 
     for (Statement statement : block.getStatements()) {
-
       if (statement.isExpressionStmt()) {
         evaluateExpression(statement.asExpressionStmt().getExpression());
+      } else if (statement.isReturnStmt()) {
+        hasReturn=true;
+        statement.asReturnStmt().getExpression().ifPresentOrElse(
+          expr -> evaluateReturnStatement(expr), 
+          () -> code.addInstruction(OpCode.return_)
+        );
       }
     }
 
-    code.addInstruction(OpCode.return_);
-
+    if (!hasReturn) code.addInstruction(OpCode.return_);
     return code;
   }
 
-  protected String evaluateExpression(Expression expr) {
+  /**
+   * <p>This method will evaluate and break down a single expression into it's sub-expressions
+   * and then evaluate those. At each level it will return the java type of that expression, 
+   * whether that be the type of a field or the return type of the method.</p>
+   * 
+   * @param expr the given expression
+   * @return string representation of the evaluated expression
+   */
+  protected Type evaluateExpression(Expression expr) {
     /**
      * Method call
      * eg. scope?.name(..args?) -> ret
@@ -47,29 +63,31 @@ public class CodeGenerator {
       MethodCallExpr methodExpr = expr.asMethodCallExpr();
 
       // Get scope
-      String scope = ""; //TEMP
+      Type scope;
       if(methodExpr.getScope().isPresent()) {
-        scope = evaluateExpression(methodExpr.getScope().get());
+        scope=evaluateExpression(methodExpr.getScope().get());
+      } else {
+        scope=new Type("", false); //TODO
       }
 
       // Get args
-      List<String> args = new ArrayList<>();
+      List<Type> args = new ArrayList<>();
       methodExpr.getArguments().forEach(arg -> 
-        args.add(Util.generateType(evaluateExpression(arg)))
+        args.add(evaluateExpression(arg))
       );
 
       // Get return type
-      String returnType = Util.generateType(methodExpr.resolve().getReturnType());
+      Type returnType = new Type(methodExpr.resolve().getReturnType());
 
       code.addInstruction(OpCode.invokevirtual,
         2, constantPool.addMethod_info(
-          scope, 
+          scope.getName(), 
           methodExpr.getName().asString(),
           Util.createTypeInfo(returnType, args)
         )
       );
 
-      return ""; //TO DO
+      return returnType;
 
     /**
      * Field access
@@ -78,28 +96,40 @@ public class CodeGenerator {
     } else if (expr.isFieldAccessExpr()) {
       FieldAccessExpr fieldExpr = expr.asFieldAccessExpr();
 
-      String scope=evaluateExpression(fieldExpr.getScope());
-      String fieldName=fieldExpr.getNameAsString();
-      String fieldType=Util.generateType(fieldExpr.resolve().getType());
+      // Get scope
+      Type scope = evaluateExpression(fieldExpr.getScope());
+
+      // Get type
+      Type fieldType = new Type(fieldExpr.resolve().getType());
 
       code.addInstruction(OpCode.getstatic, 
-        2, constantPool.addField_info(scope, fieldName, fieldType)
+        2, constantPool.addField_info(
+          scope.getName(), 
+          fieldExpr.getNameAsString(), 
+          fieldType.getFormalName()
+        )
       );
 
-      return Util.formatReferenceType(fieldExpr.resolve().getType().describe());
+      return fieldType;
 
     /**
      * String literal
      * eg. "a"
      */
     } else if (expr.isStringLiteralExpr()) {
-      String data = expr.toStringLiteralExpr().get().asString();
-
       code.addInstruction(OpCode.ldc,
-        1, constantPool.addString_info(data)
+        1, constantPool.addString_info(expr.toStringLiteralExpr().get().asString())
       );
+      code.addMaxStack(1);
+      return new Type("java/lang/String", false);
 
-      return "java/lang/String";
+    /**
+     * Integer literal
+     * eg. 1
+     */
+    } else if (expr.isIntegerLiteralExpr()) {
+      //TODO
+      return new Type("I", true);
 
     /**
      * Simple name
@@ -107,14 +137,38 @@ public class CodeGenerator {
      *     variable1
      */
     } else if (expr.isNameExpr()) {
-      return Util.formatReferenceType(expr.calculateResolvedType().describe());
+      Type exprType=new Type(expr.asNameExpr().calculateResolvedType());
+
+      // Gather list of parameters to the method and see if they match the expression
+      Optional<Parameter> p = params.stream().filter(
+        param -> param.getName().toString().equals(expr.toNameExpr().get().toString())
+      ).findFirst();
+
+      //If they do, load integer constant 
+      //TODO
+      if (p.isPresent()) {
+        code.addInstruction(OpCode.iload_1);
+        code.addMaxLocals(1);
+      }
+      
+      return exprType;
 
     /**
-     * Unknown
+     * UNKNOWN
      */
     } else {
-      System.out.println("not filtered yet: " + expr.toString());
-      return "";
+      System.out.println("NULL type generated");
+      return new Type("NULL", true);
+    }
+  }
+
+  protected void evaluateReturnStatement(Expression expression) {
+    String returnTypeName = evaluateExpression(expression).getName();
+
+    if (returnTypeName.equals("I")) {
+      code.addInstruction(OpCode.ireturn);
+    } else if (returnTypeName.equals("java/lang/String")) {
+      code.addInstruction(OpCode.areturn);
     }
   }
   
