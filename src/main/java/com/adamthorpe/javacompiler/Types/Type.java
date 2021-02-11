@@ -9,6 +9,11 @@ public class Type {
   private String name;
   private int arrayLevel=0;
 
+  /**
+   * <p>Constructor that builds a type from a JavaParser Type.</p>
+   * 
+   * @param typeInfo JavaParser Type info
+   */
   public Type(com.github.javaparser.ast.type.Type typeInfo) {
     //calculate array sublevels
     while(typeInfo.isArrayType()) {
@@ -37,6 +42,11 @@ public class Type {
     }
   }
 
+  /**
+   * <p>Constructor that builds a type from a JavaParser ResolvedType.</p>
+   * 
+   * @param typeInfo JavaParser ResolvedType info
+   */
   public Type(ResolvedType typeInfo) {
     //primitives
     if (typeInfo.isPrimitive()) {
@@ -58,24 +68,66 @@ public class Type {
     }
   }
   
+  /**
+   * <p>Constructor that builds a type from a string. The <code>isPrimitive</code> field indicates whether 
+   * this is a primitive data type.</p>
+   * 
+   * @param typeInfo string type info
+   * @param isPrimitive whether the given data is a primitive data type
+   */
   public Type(String typeInfo, boolean isPrimitive) {
     this.isPrimitive=isPrimitive;
     this.name=typeInfo;
   }
 
+
+  /**
+   * <p>Constructor that builds a type from a string. The <code>isPrimitive</code> field indicates whether 
+   * this is a primitive data type. Allows for array data types</p>
+   * 
+   * @param typeInfo string type info
+   * @param isPrimitive whether the given data is a primitive data type
+   * @param arrayLevel the number of array levels attached to this data type. Eg. int[][] = 2 array levels
+   */
   public Type(String typeInfo, boolean isPrimitive, int arrayLevel) {
     this(typeInfo, isPrimitive);
     this.arrayLevel=arrayLevel;
   }
 
+  /**
+   * <p>Formats a reference type by replacing dots with slashes.</p>
+   * 
+   * Eg.
+   * <code>java.lang.String</code> -> <code>java/lang/String</code>
+   * 
+   * @param input the input string
+   * @return formatted string
+   */
   protected String format(String input) {
     return input.replace('.', '/');
   }
 
+  /**
+   * <p>Returns the name of the type.</p>
+   * 
+   * Eg.
+   * <code>java/lang/String</code>
+   * 
+   * @return name of the type
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * <p>Returns the name of the type with Java byte code annotations.</p>
+   * 
+   * Eg.
+   * <code>Ljava/lang/String;</code>
+   * or <code>I</code>
+   * 
+   * @return name of the type in byte-code
+   */
   public String getFormalName() {
     String arrayChars="";
     for(int i=0; i<arrayLevel; i++) {
