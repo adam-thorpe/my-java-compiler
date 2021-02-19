@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.Types.Type;
-// import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
-import com.github.javaparser.resolution.types.ResolvedType;
 
 public class Util {
   /**

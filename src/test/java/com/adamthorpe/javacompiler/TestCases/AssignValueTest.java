@@ -11,20 +11,20 @@ import com.adamthorpe.javacompiler.ClassTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TwoMethodsTest extends ClassTest {
+public class AssignValueTest extends ClassTest {
 
-  public TwoMethodsTest() {
-    super("bin/TwoMethods", "TwoMethods");
+  public AssignValueTest() {
+    super("bin/AssignValue", "AssignValue");
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/TwoMethods/TwoMethods.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { "bin/AssignValue/AssignValue.java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("TwoMethods", Object.class, Modifier.PUBLIC);
+    testGeneralInfo("AssignValue", Object.class, Modifier.PUBLIC);
   }
 
   @Test
@@ -36,27 +36,16 @@ public class TwoMethodsTest extends ClassTest {
 
   @Test
   public void testMethods() {
-    assertEquals(2, thisClass.getDeclaredMethods().length);
+    assertEquals(1, thisClass.getDeclaredMethods().length);
 
     // Test method A
-    assertDoesNotThrow(() -> testMethod(thisClass.getMethod("A", int.class), Modifier.PUBLIC, int.class));
+    assertDoesNotThrow(() -> testMethod(thisClass.getMethod("addFunction", int.class), Modifier.PUBLIC, int.class));
 
     int input = 5;
     assertDoesNotThrow(() -> 
-      assertEquals(input, thisClass.getMethod("A", int.class).invoke(
+      assertEquals(10, thisClass.getMethod("addFunction", int.class).invoke(
         thisClass.getConstructor().newInstance(new Object[] {}), 
         input
-      ))
-    );
-
-    // Test method B
-    assertDoesNotThrow(() -> 
-      testMethod(thisClass.getMethod("B"), Modifier.PUBLIC, String.class)
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals("Hello", thisClass.getMethod("B").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
       ))
     );
   }
