@@ -48,7 +48,7 @@ public class ClassFile {
     this.super_class = ByteConvert.intToBytes(2, super_class);
 
     // Interface Table
-    this.interfaces_count = ByteConvert.intToBytes(2, interface_table.length);//todo
+    this.interfaces_count = ByteConvert.intToBytes(2, interface_table.length);//TODO
     this.interfaces = interface_table;
 
     // Field Table
@@ -60,7 +60,7 @@ public class ClassFile {
     this.methods = method_table.getData();
 
     // Attribute Table
-    this.attributes_count = ByteConvert.intToBytes(2, attribute_table.size());//todo
+    this.attributes_count = ByteConvert.intToBytes(2, attribute_table.size());//TODO
     this.attributes = attribute_table.getData();
   }
 
@@ -83,23 +83,4 @@ public class ClassFile {
       attributes_count,
       attributes);
   }
-
-  // public int getLength() {
-  //   return magic.length +
-  //     minor_version.length +
-  //     major_version.length +
-  //     constant_pool_count.length + 
-  //     constant_pool.length + 
-  //     access_flags.length + 
-  //     this_class.length + 
-  //     super_class.length + 
-  //     interfaces_count.length +
-  //     interfaces.length +
-  //     fields_count.length + 
-  //     fields.length + 
-  //     methods_count.length + 
-  //     methods.length +
-  //     attributes_count.length + 
-  //     attributes.length;
-  // }
 }

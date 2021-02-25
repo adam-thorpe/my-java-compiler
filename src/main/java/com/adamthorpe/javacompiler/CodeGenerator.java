@@ -11,12 +11,7 @@ import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.LocalVariableTable;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.IntegerLiteralExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -67,213 +62,241 @@ public class CodeGenerator {
   }
 
   /**
-   * <p>This method will evaluate and break down a single expression into it's sub-expressions
-   * and then evaluate those. At each level it will return the java type of that expression, 
-   * whether that be the type of a field or the return type of the method.</p>
+   * <p>This method will determine the form of <code>expression</code> and then evaluate it further. This 
+   * is a recursive function, as each expression often comprises of sub-expressions.</p>
    * 
-   * @param expr the given expression
-   * @return string representation of the evaluated expression
+   * @param expression the input expression
+   * @return expression Type
    */
-  protected Type evaluateExpression(Expression expr) {
-    /**
-     * Method call
-     * eg. scope?.name(..args?) -> ret
-     */
-    if (expr.isMethodCallExpr()) {
-      MethodCallExpr methodExpr = expr.asMethodCallExpr();
+  protected Type evaluateExpression(Expression expression) {
+    if (expression.isBinaryExpr()) {
+      return evaluateExpression(expression.asBinaryExpr());
+    
+    } else if (expression.isFieldAccessExpr()) {
+      return evaluateExpression(expression.asFieldAccessExpr());
+    
+    } else if (expression.isIntegerLiteralExpr()) {
+      return evaluateExpression(expression.asIntegerLiteralExpr());
 
-      // Get scope
-      Type scope;
-      if(methodExpr.getScope().isPresent()) {
-        scope=evaluateExpression(methodExpr.getScope().get());
-      } else {
-        scope=new Type("", false); //TODO
-      }
+    } else if (expression.isMethodCallExpr()) {
+      return evaluateExpression(expression.asMethodCallExpr());
+    
+    } else if (expression.isNameExpr()) { 
+      return evaluateExpression(expression.asNameExpr());
 
-      // Get args
-      List<Type> args = new ArrayList<>();
-      methodExpr.getArguments().forEach(arg -> 
-        args.add(evaluateExpression(arg))
-      );
+    } else if (expression.isStringLiteralExpr()) {
+      return evaluateExpression(expression.asStringLiteralExpr());
 
-      // Get return type
-      Type returnType = new Type(methodExpr.resolve().getReturnType());
+    } else if (expression.isVariableDeclarationExpr()) {
+      return evaluateExpression(expression.asVariableDeclarationExpr());
 
-      code.addInstruction(OpCode.invokevirtual,
-        2, constantPool.addMethod_info(
-          scope.getName(), 
-          methodExpr.getName().asString(),
-          Util.createTypeInfo(returnType, args)
-        )
-      );
-
-      return returnType;
-
-    /**
-     * Field access
-     * eg.  type scope.name
-     */
-    } else if (expr.isFieldAccessExpr()) {
-      FieldAccessExpr fieldExpr = expr.asFieldAccessExpr();
-
-      // Get scope
-      Type scope = evaluateExpression(fieldExpr.getScope());
-
-      // Get type
-      Type fieldType = new Type(fieldExpr.resolve().getType());
-
-      code.addInstruction(OpCode.getstatic, 
-        2, constantPool.addField_info(
-          scope.getName(), 
-          fieldExpr.getNameAsString(), 
-          fieldType.getFormalName()
-        )
-      );
-
-      return fieldType;
-
-    /**
-     * Variable Expression
-     * eg.  int var1;
-     *      String var2 = "b";
-     */
-    } else if (expr.isVariableDeclarationExpr()) {
-      VariableDeclarationExpr a = expr.toVariableDeclarationExpr().get();
-
-      
-
-      for (VariableDeclarator vd : a.getVariables()) {
-
-        // Evaluate body of declaration
-        if(vd.getInitializer().isPresent()) {
-          evaluateExpression(vd.getInitializer().get());
-        }
-
-        // Add new var
-        localVariables.add(new LocalVariable(vd.getName().asString(), vd.getType().asString()));
-        code.addMaxLocals(1);
-
-        int index = localVariables.size()-1; //TODO
-
-        System.out.println(a);
-        System.out.println(vd.getType().asString());
-        System.out.println(index);
-
-        if(vd.getType().asString().equals("int")) {
-          if (index==0) {
-            code.addInstruction(OpCode.istore_0);
-          } else if (index==1) {
-            code.addInstruction(OpCode.istore_1);
-          } else if (index==2) {
-            code.addInstruction(OpCode.istore_2);
-          } else if (index==3) {
-            code.addInstruction(OpCode.istore_3);
-          }
-        }
-
-        //TODO
-      }
-
-      return new Type("", false);
-
-    /**
-     * Assignment
-     * eg.  var1 = "a";
-     *      var2 += 0;
-     */
-    } else if (expr.isAssignExpr()) {
-      System.out.println("assign " + expr.toString());
-      return new Type("", false);
-
-    /**
-     * String literal
-     * eg. "a"
-     */
-    } else if (expr.isStringLiteralExpr()) {
-      code.addInstruction(OpCode.ldc,
-        1, constantPool.addString_info(expr.toStringLiteralExpr().get().asString())
-      );
-      code.addMaxStack(1);
-      return new Type("java/lang/String", false);
-
-    /**
-     * Integer literal
-     * eg. 1
-     */
-    } else if (expr.isIntegerLiteralExpr()) {
-      int value = expr.toIntegerLiteralExpr().get().asNumber().intValue();
-
-      if (value==0) {
-        code.addInstruction(OpCode.iconst_0);
-      } else if (value==1) {
-        code.addInstruction(OpCode.iconst_1);
-      } else if (value==2) {
-        code.addInstruction(OpCode.iconst_2);
-      } else if (value==3) {
-        code.addInstruction(OpCode.iconst_3);
-      } else if (value==4) {
-        code.addInstruction(OpCode.iconst_4);
-      } else if (value==5) {
-        code.addInstruction(OpCode.iconst_5);
-      }
-
-      return new Type("I", true);
-
-    /**
-     * Binary Expression
-     * eg.  a + b
-     *      a && b
-     */
-    } else if (expr.isBinaryExpr()) {
-
-      BinaryExpr be = expr.toBinaryExpr().get();
-      Type left = evaluateExpression(be.getLeft());
-      Type right = evaluateExpression(be.getRight());
-
-      if (be.getOperator()==Operator.PLUS) { //TODO
-        code.addInstruction(OpCode.iadd);
-        code.addMaxStack(1);
-      }
-
-      return new Type("", false); //TODO
-
-    /**
-     * Simple name
-     * eg. java.lang.String
-     *     variable1
-     */
-    } else if (expr.isNameExpr()) {
-      Type exprType=new Type(expr.asNameExpr().calculateResolvedType());
-
-      int index = localVariables.find(expr.toNameExpr().get().toString());
-      if (index==-1) return exprType;
-
-      String type = localVariables.get(index).getType();
-
-      if (type.equals("int")) {
-        if (index==0) {
-          code.addInstruction(OpCode.iload_0);
-        } else if (index==1) {
-          code.addInstruction(OpCode.iload_1);
-        } else if (index==2) {
-          code.addInstruction(OpCode.iload_2);
-        } else if (index==3) {
-          code.addInstruction(OpCode.iload_3);
-        } else {
-          code.addInstruction(OpCode.iload, 1, index);
-        }
-      }
-      
-      return exprType;
-
-    /**
-     * UNKNOWN
-     */
     } else {
-      System.out.println("NULL type generated. " + expr.toString());
+      //Unsupported expression
+      System.err.println("NULL type generated in CodeGenerator: " + expression.toString());
       return new Type("NULL", true);
     }
   }
+
+  /**
+   * <p>Evaluates a binary expression, which consists of two expressions with an operator in the 
+   * middle.
+   * Eg. <code>a + b</code> or <code>a && b</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(BinaryExpr expression) {
+
+    //Evaluate both sides of the expression
+    Type left = evaluateExpression(expression.getLeft());
+    Type right = evaluateExpression(expression.getRight());
+
+    //Evaluate operator
+    if (expression.getOperator()==Operator.PLUS) { //TODO
+      code.addInstruction(OpCode.iadd);
+      code.addMaxStack(1);
+      return new Type("I", true); //Return integer type
+    }
+
+    return new Type("", false); //TODO
+  }
+
+  /**
+   * <p>Evaluates a field access expression.
+   * Eg. <code>System.out</code> or <code>myField1</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(FieldAccessExpr expression) {
+    // Get scope
+    Type scope = evaluateExpression(expression.getScope());
+
+    // Get type
+    Type fieldType = new Type(expression.resolve().getType());
+
+    code.addInstruction(OpCode.getstatic, 
+      2, constantPool.addField_info(
+        scope.getName(), 
+        expression.getNameAsString(), 
+        fieldType.getFormalName()
+      )
+    );
+
+    return fieldType;
+  }
+
+  /**
+   * <p>Evaluates an integer literal expression.
+   * Eg. <code>5</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(IntegerLiteralExpr expression) {
+    int value = expression.asNumber().intValue(); //Evaluate integer value of the expression
+
+    if (value==0) {
+      code.addInstruction(OpCode.iconst_0);
+    } else if (value==1) {
+      code.addInstruction(OpCode.iconst_1);
+    } else if (value==2) {
+      code.addInstruction(OpCode.iconst_2);
+    } else if (value==3) {
+      code.addInstruction(OpCode.iconst_3);
+    } else if (value==4) {
+      code.addInstruction(OpCode.iconst_4);
+    } else if (value==5) {
+      code.addInstruction(OpCode.iconst_5);
+    } else {
+      //TODO
+    }
+
+    return new Type("I", true); //Return integer type
+  }
+
+  /**
+   * <p>Evaluates a method call expression.
+   * Eg. <code>method1(arg1);</code> or <code>class.getThis();</code>.</p>
+   * 
+   * @param expression
+   * @return
+   */
+  protected Type evaluateExpression(MethodCallExpr expression) {
+    //Evaluate scope
+    Type scopeType;
+    if(expression.getScope().isPresent()) {
+      scopeType=evaluateExpression(expression.getScope().get());
+    } else {
+      scopeType=new Type("", false); //TODO
+    }
+
+    //Evaluate arguments
+    List<Type> argTypes = new ArrayList<>();
+    expression.getArguments().forEach(arg -> 
+      argTypes.add(evaluateExpression(arg))
+    );
+
+    //Get method return type
+    Type returnType = new Type(expression.resolve().getReturnType());
+
+    code.addInstruction(OpCode.invokevirtual,
+      2, constantPool.addMethod_info(
+        scopeType.getName(), 
+        expression.getName().asString(),
+        Util.createTypeInfo(returnType, argTypes)
+      )
+    );
+
+    return returnType;
+  }
+
+  /**
+   * <p>Evaluates a name expression.
+   * Eg. <code>java.lang.String</code> or <code>var1</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(NameExpr expression) { //TODO
+    Type exprType=new Type(expression.asNameExpr().calculateResolvedType());
+
+    int index = localVariables.find(expression.toNameExpr().get().toString());
+    if (index==-1) return exprType;
+
+    String type = localVariables.get(index).getType();
+
+    if (type.equals("int")) {
+      if (index==0) {
+        code.addInstruction(OpCode.iload_0);
+      } else if (index==1) {
+        code.addInstruction(OpCode.iload_1);
+      } else if (index==2) {
+        code.addInstruction(OpCode.iload_2);
+      } else if (index==3) {
+        code.addInstruction(OpCode.iload_3);
+      } else {
+        code.addInstruction(OpCode.iload, 1, index);
+      }
+    }
+
+    return exprType;
+  }
+  
+  /**
+   * <p>Evaluates a String literal expression.
+   * Eg. <code>"Hello World!"</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(StringLiteralExpr expression) {
+    code.addInstruction(OpCode.ldc,
+      1, constantPool.addString_info(expression.asString())
+    );
+    code.addMaxStack(1);
+
+    return new Type("java/lang/String", false); //Return String Type
+  }
+
+  /**
+   * <p>Evaluates a variable declaration. Can be a multitide of variable declarations.
+   * Eg. <code>int a = 5;</code> or <code>String var1, var2;</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(VariableDeclarationExpr expression) {
+    // Loop through variable declarations
+    for (VariableDeclarator variableDeclaration : expression.getVariables()) {
+
+      // Evaluate body of declaration if it exists
+      variableDeclaration.getInitializer().ifPresent(body -> evaluateExpression(body));
+
+      // Add new variable to local variables table
+      localVariables.add(
+        new LocalVariable(variableDeclaration.getName().asString(), variableDeclaration.getType().asString())
+      );
+      code.addMaxLocals(1);
+
+      int index = localVariables.size()-1;
+      if(variableDeclaration.getType().asString().equals("int")) {
+        if (index==0) {
+          code.addInstruction(OpCode.istore_0);
+        } else if (index==1) {
+          code.addInstruction(OpCode.istore_1);
+        } else if (index==2) {
+          code.addInstruction(OpCode.istore_2);
+        } else if (index==3) {
+          code.addInstruction(OpCode.istore_3);
+        }
+        return new Type("I", true);
+      }
+    }
+
+    return new Type("", false); //TODO
+  }
+
 
   /**
    * 
