@@ -27,6 +27,8 @@ public class Type {
       //int
       if (typeInfo.asPrimitiveType().asString().equals("int")) {
         name="I";
+      } else {
+        name="";
       }
 
     //void
@@ -39,6 +41,9 @@ public class Type {
       isPrimitive=false;
       name=format(typeInfo.resolve().describe());
 
+    } else {
+      isPrimitive=false;
+      name="";
     }
   }
 
@@ -54,6 +59,8 @@ public class Type {
       //int
       if (typeInfo.asPrimitive()==ResolvedPrimitiveType.INT) {
         name="I";
+      } else {
+        name="";
       }
 
     //void
@@ -65,6 +72,10 @@ public class Type {
     } else if (typeInfo.isReference()) {
       isPrimitive=false;
       name=format(typeInfo.describe());
+      
+    } else {
+      isPrimitive=false;
+      name="";
     }
   }
   
