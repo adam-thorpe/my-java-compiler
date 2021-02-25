@@ -25,12 +25,12 @@ public class CompilerCore {
 
   private CompilationUnit cu;
   private ConstantPool constantPool;
-  private int thisClass;
-  private int superClass;
+  private int thisClassIndex;
+  private int superClassIndex;
   private String className;
   private String filePath;
 
-  byte[] interfacesTable = new byte[0]; // to do
+  byte[] interfacesTable = new byte[0]; //TODO
   FieldOrMethodTable fieldsTable;
   FieldOrMethodTable methodsTable;
   AttributesTable attributesTable;
@@ -55,67 +55,50 @@ public class CompilerCore {
 
     // Create the class file
     try {
-      ClassFile classFile = new ClassFile(constantPool, thisClass, superClass, interfacesTable, fieldsTable,
+      ClassFile classFile = new ClassFile(constantPool, thisClassIndex, superClassIndex, interfacesTable, fieldsTable,
           methodsTable, attributesTable);
 
       // Write out to file
-      outputToFile(classFile.getData(), filePath + "/" + className + ".class");
+      Util.outputToFile(classFile.getData(), filePath + "/" + className + ".class");
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   /**
-   * Writes an array of bytes to file
-   * 
-   * @param data An array of bytes
-   */
-  protected void outputToFile(byte[] data, String destination) {
-    try {
-      OutputStream out = new FileOutputStream(destination);
-      out.write(data);
-      out.close();
-      System.out.println("Class compiled successfully to " + destination);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  
-
-  /**
-   * Creates the data for the class
+   * <p>Creates the data for the class.</p>
    * 
    * @param classDeclaration info about the class
    */
   protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
     // Define this class
-    thisClass = constantPool.addClass_info(classDeclaration.getNameAsString());
     className = classDeclaration.getNameAsString();
-
+    thisClassIndex = constantPool.addClass_info(className);
+    
     if (classDeclaration.getExtendedTypes().isEmpty()) {
       // Add default superclass "Object"
-      superClass = constantPool.addClass_info("java/lang/Object");
+      superClassIndex = constantPool.addClass_info("java/lang/Object");
     } else {
+      //Superclasses
       for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
-        // System.out.println("Super Class Name: " + resolveType(superClassType));
-        // TO DO
+        // TODO
       }
     }
   }
 
   /**
-   * Creates the data for each declared method
+   * <p>Creates the data for each declared method and any default constructors.</p>
    * 
    * @param methodDeclarations the method declarations
    */
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
+
     createConstructor();
 
     for (MethodDeclaration md : methodDeclarations) {
 
       int accessFlags=0;
-      // Check accessflags
+      // Check access flags
       if(md.isPublic()) accessFlags+=Modifier.PUBLIC;
       if(md.isStatic()) accessFlags+=Modifier.STATIC;
 
@@ -125,21 +108,23 @@ public class CompilerCore {
         paramTypes.add(new Type(param.getType()));
       }
 
+      //Generate code in the code generator
       ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get(), md.getParameters());
 
+      //Create code attribute
       AttributesTable attributes = new AttributesTable(constantPool);
       attributes.addCodeAttribute(code);
 
-      methodsTable.insert(md.getName().asString(), accessFlags, Util.createTypeInfo(new Type(md.getType()), paramTypes), attributes);
+      //Add method to method table
+      methodsTable.insert(md.getNameAsString(), accessFlags, Util.createTypeInfo(new Type(md.getType()), paramTypes), attributes);
     }
   }
 
-
   /**
-   * Creates the data for a default constructor
+   * <p>Creates the data for a default constructor.</p>
    */
   protected void createConstructor() {
-    // Generate code
+    //Generate code
     ByteCode code = new ByteCode(constantPool);
     code.addInstruction(OpCode.aload_0);
     code.addInstruction(OpCode.invokespecial, 
@@ -147,12 +132,17 @@ public class CompilerCore {
     );
     code.addInstruction(OpCode.return_);
 
-    // Create attributes
+    //Create code attribute
     AttributesTable attributes = new AttributesTable(constantPool);
     attributes.addCodeAttribute(code);
+
+    //Add method to method table
     methodsTable.insert("<init>", Modifier.PUBLIC,  "()V", attributes);
   }
 
+  /**
+   * <p>Creates the data for the main attributes table.</p>
+   */
   protected void createAttributes() {
     attributesTable.addSourceFileAttribute(className + ".java");
   }

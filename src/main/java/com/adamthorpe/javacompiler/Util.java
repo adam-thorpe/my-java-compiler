@@ -1,5 +1,8 @@
 package com.adamthorpe.javacompiler;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,5 +40,21 @@ public class Util {
    */
   public static String createTypeInfo(Type returnType) {
     return createTypeInfo(returnType, new ArrayList<>());
+  }
+
+  /**
+   * Writes an array of bytes to file
+   * 
+   * @param data An array of bytes
+   */
+  public static void outputToFile(byte[] data, String destination) {
+    try {
+      OutputStream out = new FileOutputStream(destination);
+      out.write(data);
+      out.close();
+      System.out.println("Class compiled successfully to " + destination);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
