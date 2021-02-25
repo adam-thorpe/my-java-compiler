@@ -74,6 +74,9 @@ public class CodeGenerator {
   protected Type evaluateExpression(Expression expression) {
     if (expression.isBinaryExpr()) {
       return evaluateExpression(expression.asBinaryExpr());
+
+    } else if (expression.isBooleanLiteralExpr()) {
+      return evaluateExpression(expression.asBooleanLiteralExpr());
     
     } else if (expression.isFieldAccessExpr()) {
       return evaluateExpression(expression.asFieldAccessExpr());
@@ -94,7 +97,6 @@ public class CodeGenerator {
       return evaluateExpression(expression.asVariableDeclarationExpr());
 
     } else {
-      //Unsupported expression
       System.err.println("Unsupported expression: " + expression.toString());
       return new EmptyType();
     }
@@ -122,6 +124,25 @@ public class CodeGenerator {
     }
 
     return new EmptyType(); //TODO
+  }
+
+  /**
+   * <p>Evaluates a boolean literal.
+   * Eg. <code>true</code> or <code>false</code>.</p>
+   * 
+   * @param expression the input expression
+   * @return expression Type
+   */
+  protected Type evaluateExpression(BooleanLiteralExpr expression) {
+    boolean value = expression.getValue();
+
+    if(value) {
+      code.addInstruction(OpCode.iconst_1);
+    } else {
+      code.addInstruction(OpCode.iconst_0);
+    }
+
+    return new Type("Z", true);
   }
 
   /**
@@ -229,7 +250,7 @@ public class CodeGenerator {
     int index = localVariables.find(expression.getNameAsString());
     if (index==-1) return exprType;
 
-    if (exprType.isInt()) {
+    if (exprType.isInt() || exprType.isBool()) {
       if (index==0) {
         code.addInstruction(OpCode.iload_0);
       } else if (index==1) {
@@ -270,20 +291,26 @@ public class CodeGenerator {
    * @return expression Type
    */
   protected Type evaluateExpression(VariableDeclarationExpr expression) {
+
+    Type expressionType = new EmptyType();
+
     // Loop through variable declarations
     for (VariableDeclarator variableDeclaration : expression.getVariables()) {
 
       // Evaluate body of declaration if it exists
       variableDeclaration.getInitializer().ifPresent(body -> evaluateExpression(body));
 
+      //Create type
+      expressionType = new Type(variableDeclaration.getType());
+
       // Add new variable to local variables table
       localVariables.add(
-        new LocalVariable(variableDeclaration.getName().asString(), new Type(variableDeclaration.getType()))
+        new LocalVariable(variableDeclaration.getName().asString(), expressionType)
       );
       code.addMaxLocals(1);
 
       int index = localVariables.size()-1;
-      if(variableDeclaration.getType().asString().equals("int")) {
+      if(expressionType.isInt() || expressionType.isBool()) {
         if (index==0) {
           code.addInstruction(OpCode.istore_0);
         } else if (index==1) {
@@ -293,11 +320,10 @@ public class CodeGenerator {
         } else if (index==3) {
           code.addInstruction(OpCode.istore_3);
         }
-        return new Type("I", true);
       }
     }
 
-    return new EmptyType(); //TODO
+    return expressionType;
   }
 
   /**
@@ -309,7 +335,7 @@ public class CodeGenerator {
   protected void evaluateReturnStatement(Expression expression) {
     Type returnType = evaluateExpression(expression);
 
-    if (returnType.isInt()) {
+    if (returnType.isInt() || returnType.isBool()) {
       code.addInstruction(OpCode.ireturn);
     } else if (returnType.getName().equals("java/lang/String")) {
       code.addInstruction(OpCode.areturn);

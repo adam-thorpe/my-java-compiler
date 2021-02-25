@@ -51,6 +51,17 @@ public class BooleansTest extends ClassTest {
       ))
     );
 
+    //Test method False
+    assertDoesNotThrow(() ->
+      testMethod(thisClass.getMethod("False"), Modifier.PUBLIC, boolean.class)
+    );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(false, thisClass.getMethod("False", boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {})
+      ))
+    );
+
     //Test method DoNotEvaluateRight
     assertDoesNotThrow(() ->
       testMethod(thisClass.getMethod("DoNotEvaluateRight"), Modifier.PUBLIC, boolean.class)

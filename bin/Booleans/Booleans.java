@@ -5,6 +5,10 @@ public class Booleans {
     return output;
   }
 
+  public boolean False() {
+    return false;
+  }
+
   public boolean BoolLoop(boolean b) {
     return BoolLoop(b);
   }
@@ -14,11 +18,11 @@ public class Booleans {
   }
 
   public boolean DoNotEvaluateRight2() {
-    return !True() && BoolLoop(true);
+    return False() && BoolLoop(true);
   }
 
   public boolean EvaluateBoth() {
-    return !True() || True();
+    return !True() || !False();
   }
 
   public boolean EvaluateBoth2() {
@@ -26,6 +30,6 @@ public class Booleans {
   }
 
   public boolean EvaluateNested() {
-    return !True() || True() && True();
+    return !True() || True() && !False();
   }
 }

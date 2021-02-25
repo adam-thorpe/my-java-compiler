@@ -1,5 +1,6 @@
 package com.adamthorpe.javacompiler.Types;
 
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 
@@ -25,8 +26,10 @@ public class Type {
     if (typeInfo.isPrimitiveType()) {
       isPrimitive=true;
       //int
-      if (typeInfo.asPrimitiveType().asString().equals("int")) {
+      if (typeInfo.asPrimitiveType().equals(PrimitiveType.intType())) {
         name="I";
+      } else if (typeInfo.asPrimitiveType().equals(PrimitiveType.booleanType())) {
+        name="Z";
       } else {
         name="";
       }
@@ -59,6 +62,8 @@ public class Type {
       //int
       if (typeInfo.asPrimitive()==ResolvedPrimitiveType.INT) {
         name="I";
+      } else if (typeInfo.asPrimitive()==ResolvedPrimitiveType.BOOLEAN) {
+        name="Z";
       } else {
         name="";
       }
@@ -154,5 +159,9 @@ public class Type {
 
   public boolean isInt() {
     return name.equals("I") && isPrimitive;
+  }
+
+  public boolean isBool() {
+    return name.equals("Z") && isPrimitive;
   }
 }
