@@ -3,9 +3,9 @@ package com.adamthorpe.javacompiler.Types;
 public class LocalVariable {
   
   private String name;
-  private String type;
+  private Type type;
 
-  public LocalVariable(String name, String type) {
+  public LocalVariable(String name, Type type) {
     this.name=name;
     this.type=type;
   }
@@ -14,7 +14,7 @@ public class LocalVariable {
     return name;
   }
 
-  public String getType() {
+  public Type getType() {
     return type;
   }
 }

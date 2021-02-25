@@ -140,5 +140,8 @@ public class Type {
       return arrayChars+"L"+name+";";
     }
   }
-  
+
+  public boolean isInt() {
+    return name.equals("I") && isPrimitive;
+  }
 }

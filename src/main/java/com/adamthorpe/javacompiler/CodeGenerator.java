@@ -3,6 +3,7 @@ package com.adamthorpe.javacompiler;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.adamthorpe.javacompiler.Types.EmptyType;
 import com.adamthorpe.javacompiler.Types.LocalVariable;
 import com.adamthorpe.javacompiler.Types.Type;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
@@ -39,19 +40,21 @@ public class CodeGenerator {
     code = new ByteCode(constantPool);
 
     //Populate LocalVariableTable
-    localVariables.add(new LocalVariable("this", "")); //TODO
+    localVariables.add(new LocalVariable("this", new EmptyType())); //TODO
     for (Parameter param : parameters) {
-      localVariables.add(new LocalVariable(param.getNameAsString(), param.getTypeAsString()));
+      localVariables.add(new LocalVariable(param.getNameAsString(), new Type(param.getType())));
       code.addMaxLocals(1);
     }
 
+    //Evaluate each statement
     for (Statement statement : block.getStatements()) {
       if (statement.isExpressionStmt()) {
         evaluateExpression(statement.asExpressionStmt().getExpression());
-      } else if (statement.isReturnStmt()) {
+
+      } else if (statement.isReturnStmt()) { //Evaluate the return statement
         hasReturn=true;
         statement.asReturnStmt().getExpression().ifPresentOrElse(
-          expr -> evaluateReturnStatement(expr), 
+          retExpr -> evaluateReturnStatement(retExpr), 
           () -> code.addInstruction(OpCode.return_)
         );
       }
@@ -92,8 +95,8 @@ public class CodeGenerator {
 
     } else {
       //Unsupported expression
-      System.err.println("NULL type generated in CodeGenerator: " + expression.toString());
-      return new Type("NULL", true);
+      System.err.println("Unsupported expression: " + expression.toString());
+      return new EmptyType();
     }
   }
 
@@ -118,7 +121,7 @@ public class CodeGenerator {
       return new Type("I", true); //Return integer type
     }
 
-    return new Type("", false); //TODO
+    return new EmptyType(); //TODO
   }
 
   /**
@@ -172,7 +175,7 @@ public class CodeGenerator {
       //TODO
     }
 
-    return new Type("I", true); //Return integer type
+    return new Type("I", true);
   }
 
   /**
@@ -188,7 +191,7 @@ public class CodeGenerator {
     if(expression.getScope().isPresent()) {
       scopeType=evaluateExpression(expression.getScope().get());
     } else {
-      scopeType=new Type("", false); //TODO
+      scopeType=new EmptyType(); //TODO
     }
 
     //Evaluate arguments
@@ -218,15 +221,15 @@ public class CodeGenerator {
    * @param expression the input expression
    * @return expression Type
    */
-  protected Type evaluateExpression(NameExpr expression) { //TODO
-    Type exprType=new Type(expression.asNameExpr().calculateResolvedType());
+  protected Type evaluateExpression(NameExpr expression) {
+    //Get the type of the name expression
+    Type exprType = new Type(expression.calculateResolvedType());
 
-    int index = localVariables.find(expression.toNameExpr().get().toString());
+    //Search localVariableTable for variable name. Return type if it is not found
+    int index = localVariables.find(expression.getNameAsString());
     if (index==-1) return exprType;
 
-    String type = localVariables.get(index).getType();
-
-    if (type.equals("int")) {
+    if (exprType.isInt()) {
       if (index==0) {
         code.addInstruction(OpCode.iload_0);
       } else if (index==1) {
@@ -275,7 +278,7 @@ public class CodeGenerator {
 
       // Add new variable to local variables table
       localVariables.add(
-        new LocalVariable(variableDeclaration.getName().asString(), variableDeclaration.getType().asString())
+        new LocalVariable(variableDeclaration.getName().asString(), new Type(variableDeclaration.getType()))
       );
       code.addMaxLocals(1);
 
@@ -294,21 +297,21 @@ public class CodeGenerator {
       }
     }
 
-    return new Type("", false); //TODO
+    return new EmptyType(); //TODO
   }
 
-
   /**
+   * <p>Evaluates the expression in a return statement
+   * Eg. <code>return var1;</code> or <code>return 2+3;</code>.</p>
    * 
-   * 
-   * @param expression
+   * @param expression input return expression
    */
   protected void evaluateReturnStatement(Expression expression) {
-    String returnTypeName = evaluateExpression(expression).getName();
+    Type returnType = evaluateExpression(expression);
 
-    if (returnTypeName.equals("I")) {
+    if (returnType.isInt()) {
       code.addInstruction(OpCode.ireturn);
-    } else if (returnTypeName.equals("java/lang/String")) {
+    } else if (returnType.getName().equals("java/lang/String")) {
       code.addInstruction(OpCode.areturn);
     }
   }
