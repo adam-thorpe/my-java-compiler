@@ -109,7 +109,7 @@ public class CompilerCore {
       }
 
       //Generate code in the code generator
-      ByteCode code = new CodeGenerator(constantPool).run(md.getBody().get(), md.getParameters());
+      ByteCode code = new CodeGenerator(constantPool, className).run(md.getBody().get(), md.getParameters());
 
       //Create code attribute
       AttributesTable attributes = new AttributesTable(constantPool);

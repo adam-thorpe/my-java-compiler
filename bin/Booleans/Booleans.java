@@ -9,27 +9,19 @@ public class Booleans {
     return false;
   }
 
-  public boolean BoolLoop(boolean b) {
-    return BoolLoop(b);
+  public boolean TestAND() {
+    return true && false;
   }
 
-  public boolean DoNotEvaluateRight() {
-    return True() || BoolLoop(false);
+  public boolean TestOR() {
+    return false || true;
   }
 
-  public boolean DoNotEvaluateRight2() {
-    return False() && BoolLoop(true);
+  public boolean TestAND2(boolean a, boolean b) {
+    return a && b;
   }
 
-  public boolean EvaluateBoth() {
-    return !True() || !False();
-  }
-
-  public boolean EvaluateBoth2() {
-    return True() && !True();
-  }
-
-  public boolean EvaluateNested() {
-    return !True() || True() && !False();
+  public boolean TestOR2(boolean a, boolean b) {
+    return a || b;
   }
 }

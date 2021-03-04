@@ -9,20 +9,29 @@ public class ByteCode extends DataTable<Instruction> {
   private ConstantPool constantPool;
   private int max_stack;
   private int max_locals;
+  private int currentIndex;
 
   public ByteCode(ConstantPool constantPool) {
     this.constantPool = constantPool;
 
     max_stack=1;
     max_locals=1;
+
+    currentIndex=0;
   }  
 
   public void addInstruction(OpCode op) {
-    this.add(new Instruction(op));
+    this.add(new Instruction(op, currentIndex));
+    currentIndex+=op.getLen();
   }
 
   public void addInstruction(OpCode op, int bytes, int cpIndex) {
-    this.add(new Instruction(op, bytes, cpIndex));
+    this.add(new Instruction(op, currentIndex, bytes, cpIndex));
+    currentIndex+=op.getLen();
+  }
+
+  public void addJumpInstruction(OpCode op, int branch) {
+    
   }
 
   public void addMaxStack(int increment) {

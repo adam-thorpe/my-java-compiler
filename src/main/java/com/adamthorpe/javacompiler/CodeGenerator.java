@@ -23,10 +23,12 @@ public class CodeGenerator {
   protected ByteCode code;
   protected boolean hasReturn=false; //TEMP
   protected LocalVariableTable localVariables;
+  protected String className;
 
-  public CodeGenerator(ConstantPool constantPool) {
+  public CodeGenerator(ConstantPool constantPool, String className) {
     this.constantPool = constantPool;
     this.localVariables = new LocalVariableTable();
+    this.className = className;
   }
 
   /**
@@ -208,11 +210,11 @@ public class CodeGenerator {
    */
   protected Type evaluateExpression(MethodCallExpr expression) {
     //Evaluate scope
-    Type scopeType;
+    String scopeName;
     if(expression.getScope().isPresent()) {
-      scopeType=evaluateExpression(expression.getScope().get());
+      scopeName=evaluateExpression(expression.getScope().get()).getName();
     } else {
-      scopeType=new EmptyType(); //TODO
+      scopeName=className;
     }
 
     //Evaluate arguments
@@ -226,7 +228,7 @@ public class CodeGenerator {
 
     code.addInstruction(OpCode.invokevirtual,
       2, constantPool.addMethod_info(
-        scopeType.getName(), 
+        scopeName, 
         expression.getName().asString(),
         Util.createTypeInfo(returnType, argTypes)
       )
@@ -259,8 +261,6 @@ public class CodeGenerator {
         code.addInstruction(OpCode.iload_2);
       } else if (index==3) {
         code.addInstruction(OpCode.iload_3);
-      } else {
-        code.addInstruction(OpCode.iload, 1, index);
       }
     }
 

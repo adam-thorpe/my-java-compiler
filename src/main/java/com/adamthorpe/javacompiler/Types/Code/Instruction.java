@@ -7,17 +7,23 @@ public class Instruction implements ByteData {
 
   private byte[] opcode; //u1
   private byte[] args; //optional
+  private int index;
 
-  public Instruction(OpCode op) {
+  public Instruction(OpCode op, int index) {
     this.opcode = ByteConvert.intToBytes(1, op.getCode());
     this.args = new byte[0];
+    this.index = index;
   }
 
-  public Instruction(OpCode op, int bytes, int cpIndex) {
-    this(op);
+  public Instruction(OpCode op, int index, int bytes, int cpIndex) {
+    this(op, index);
 
     byte[] arg = ByteConvert.intToBytes(bytes, cpIndex);
     this.args = arg;
+  }
+
+  public int getIndex() {
+    return index;
   }
 
   @Override

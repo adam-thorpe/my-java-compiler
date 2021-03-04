@@ -38,7 +38,7 @@ public class BooleansTest extends ClassTest {
 
   @Test
   public void testMethods() {
-    assertEquals(7, thisClass.getDeclaredMethods().length);
+    assertEquals(6, thisClass.getDeclaredMethods().length);
 
     //Test method True
     assertDoesNotThrow(() ->
@@ -62,60 +62,93 @@ public class BooleansTest extends ClassTest {
       ))
     );
 
-    //Test method DoNotEvaluateRight
+    //Test method TestAND
     assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("DoNotEvaluateRight"), Modifier.PUBLIC, boolean.class)
+      testMethod(thisClass.getMethod("TestAND"), Modifier.PUBLIC, boolean.class)
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("DoNotEvaluateRight", boolean.class).invoke(
+      assertEquals(false, thisClass.getMethod("TestAND").invoke(
         thisClass.getConstructor().newInstance(new Object[] {})
       ))
     );
 
-    //Test method DoNotEvaluateRight2
+    //Test method TestOR
     assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("DoNotEvaluateRight2"), Modifier.PUBLIC, boolean.class)
+      testMethod(thisClass.getMethod("TestOR"), Modifier.PUBLIC, boolean.class)
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("DoNotEvaluateRight2", boolean.class).invoke(
+      assertEquals(true, thisClass.getMethod("TestOR").invoke(
         thisClass.getConstructor().newInstance(new Object[] {})
       ))
     );
 
-    //Test method EvaluateBoth
+    //Test method TestAND2
     assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("EvaluateBoth"), Modifier.PUBLIC, boolean.class)
+      testMethod(thisClass.getMethod("TestAND2", boolean.class, boolean.class), Modifier.PUBLIC, boolean.class)
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("EvaluateBoth", boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
+      assertEquals(true, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        true, true
       ))
-    );
-
-    //Test method EvaluateBoth2
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("EvaluateBoth2"), Modifier.PUBLIC, boolean.class)
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("EvaluateBoth2", boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
+      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        true, false
       ))
-    );
-
-    //Test method EvaluateNested
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("EvaluateNested"), Modifier.PUBLIC, boolean.class)
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("EvaluateNested", boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
+      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        false, true
       ))
     );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        false, false
+      ))
+    );
+
+    //Test method TestOR2
+    assertDoesNotThrow(() ->
+      testMethod(thisClass.getMethod("TestOR2", boolean.class, boolean.class), Modifier.PUBLIC, boolean.class)
+    );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        true, true
+      ))
+    );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        true, false
+      ))
+    );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        false, true
+      ))
+    );
+
+    assertDoesNotThrow(() -> 
+      assertEquals(false, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        false, false
+      ))
+    );
+
   }
-  
 }
