@@ -1,7 +1,10 @@
 package com.adamthorpe.javacompiler.Types.Attributes;
 
+import java.security.KeyStore.Entry.Attribute;
+
 import com.adamthorpe.javacompiler.ByteConvert;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
+import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
 
 public class Code_attribute extends Attributes_info {
 
@@ -17,7 +20,7 @@ public class Code_attribute extends Attributes_info {
   protected byte[] attributes_count; //u2
   protected byte[] attributes; //attributes_count
 
-  public Code_attribute(int attribute_name_index, ByteCode code) {
+  public Code_attribute(int attribute_name_index, ByteCode code, AttributesTable attributes) {
     super(attribute_name_index);
 
     this.code = code.getData();
@@ -26,8 +29,8 @@ public class Code_attribute extends Attributes_info {
     this.exception_table = new Exception_table[0]; //Empty
     this.exception_table_length = ByteConvert.intToBytes(2, exception_table.length);
 
-    this.attributes = new byte[0]; //Empty
-    this.attributes_count = ByteConvert.intToBytes(2, attributes.length);
+    this.attributes = attributes.getData();
+    this.attributes_count = ByteConvert.intToBytes(2, attributes.getLength());
 
     this.max_stack = ByteConvert.intToBytes(2, code.getMaxStack());
     this.max_locals = ByteConvert.intToBytes(2, code.getMaxLocals());

@@ -1,9 +1,13 @@
 package com.adamthorpe.javacompiler;
 
+import java.util.List;
+
+import com.adamthorpe.javacompiler.Types.ByteData;
+
 public class ByteConvert {
 
   /**
-   * Converts a hex string into an array of bytes.
+   * <p>Converts a hex string into an array of bytes.</p>
    * 
    * @param hex         the input hex stream
    * @return            a byte array
@@ -30,8 +34,8 @@ public class ByteConvert {
   }
 
   /**
-   * Converts a hex character into an integer value.
-   * Ranges from 0 to 127 and -128 to -1.
+   * <p>Converts a hex character into an integer value.
+   * Ranges from 0 to 127 and -128 to -1.</p>
    * 
    * @param letter      the hex character
    * @return            an integer representation of <code>letter</code>
@@ -47,8 +51,8 @@ public class ByteConvert {
   }
 
   /**
-   * Converts an integer into a byte representation, conforming to a byte <code>length</code>.
-   * It does this by padding any extra bytes.
+   * <p>Converts an integer into a byte representation, conforming to a byte <code>length</code>.
+   * It does this by padding any extra bytes.</p>
    * 
    * @param length the length of the new array
    * @param data the data being converted into bytes
@@ -64,10 +68,9 @@ public class ByteConvert {
     return output;
   }
 
-
   /**
-   * Converts one or many byte arrays into a single byte array.
-   * It does this by copying each element into a new array.
+   * <p>Converts one or many byte arrays into a single byte array.
+   * It does this by copying each element into a new array.</p>
    * 
    * @param data one or more byte arrays
    * @return a single byte array
@@ -75,7 +78,7 @@ public class ByteConvert {
   public static byte[] toByteArr(byte[] ...data) {
 
     // Calculate the length of the new array
-    int length=0;
+    int length = 0;
     for(byte[] d: data) {
       length+=d.length;
     }
@@ -92,5 +95,33 @@ public class ByteConvert {
 
     return output;
   }
-  
+
+  /**
+   * <p>Converts an arbitary list of byte arrays into a single byte array.
+   * It does this by copying each element into a new array.</p>
+   * 
+   * @param dataArray list of byte arrays
+   * @return a single byte array
+   */
+  public static byte[] toByteArr(List<? extends ByteData> dataArray) {
+    
+    // Calculate the length of the new array
+    int length = 0;
+    for (ByteData data : dataArray) {
+      length+=data.getLength();
+    }
+
+    // Create new array
+    byte[] output = new byte[length];
+    int counter = 0;
+
+    // Copy elements into it
+    for (ByteData d : dataArray) {
+      System.arraycopy(d.getData(), 0, output, counter, d.getLength());
+      counter+=d.getLength();
+    }
+
+    return output;
+  }
+
 }

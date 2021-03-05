@@ -7,7 +7,9 @@ import com.adamthorpe.javacompiler.Types.EmptyType;
 import com.adamthorpe.javacompiler.Types.LocalVariable;
 import com.adamthorpe.javacompiler.Types.Type;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
+import com.adamthorpe.javacompiler.Types.Code.Instruction;
 import com.adamthorpe.javacompiler.Types.Code.OpCode;
+import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
 import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.LocalVariableTable;
 import com.github.javaparser.ast.body.Parameter;
@@ -21,12 +23,16 @@ public class CodeGenerator {
 
   protected ConstantPool constantPool;
   protected ByteCode code;
+
+  protected AttributesTable codeAttributes;
+
   protected boolean hasReturn=false; //TEMP
   protected LocalVariableTable localVariables;
   protected String className;
 
   public CodeGenerator(ConstantPool constantPool, String className) {
     this.constantPool = constantPool;
+    this.codeAttributes = new AttributesTable(constantPool);
     this.localVariables = new LocalVariableTable();
     this.className = className;
   }
@@ -36,9 +42,11 @@ public class CodeGenerator {
    * 
    * @param block the block of code to work on
    * @param parameters method parameters
-   * @return resulting byte code
+   * @return resulting attributes with bytecode
    */
-  public ByteCode run(BlockStmt block, List<Parameter> parameters) {
+  public AttributesTable run(BlockStmt block, List<Parameter> parameters) {
+    AttributesTable attributes = new AttributesTable(constantPool);
+
     code = new ByteCode(constantPool);
 
     //Populate LocalVariableTable
@@ -63,7 +71,9 @@ public class CodeGenerator {
     }
 
     if (!hasReturn) code.addInstruction(OpCode.return_);
-    return code;
+
+    attributes.addCodeAttribute(code, codeAttributes);
+    return attributes;
   }
 
   /**
@@ -114,14 +124,37 @@ public class CodeGenerator {
    */
   protected Type evaluateExpression(BinaryExpr expression) {
 
-    //Evaluate both sides of the expression
-    Type left = evaluateExpression(expression.getLeft());
-    Type right = evaluateExpression(expression.getRight());
+    Operator op = expression.getOperator();
 
-    //Evaluate operator
-    if (expression.getOperator()==Operator.PLUS) { //TODO
+    //Evaluate the operator
+    if (op==Operator.AND || op==Operator.OR) {
+
+      Instruction jumpToFalse = new Instruction(OpCode.iconst_0, -1);
+      Instruction jumpToTrue = new Instruction(OpCode.iconst_1, -1);
+      Type left = evaluateExpression(expression.getLeft());
+
+      if (op==Operator.AND) {
+        code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
+      } else if (op==Operator.OR) {
+        code.addJumpInstruction(OpCode.ifne, jumpToTrue);
+      }
+
+      Type right = evaluateExpression(expression.getRight());
+      code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
+      code.addInstruction(jumpToTrue);
+
+      code.addJumpInstruction(OpCode.goto_, jumpToFalse.getOpCode().getLen());
+      code.addInstruction(jumpToFalse);
+
+      return new Type("Z", true); //Return boolean type
+    
+    } else if (op==Operator.PLUS) { //TODO
+      Type left = evaluateExpression(expression.getLeft());
+      Type right = evaluateExpression(expression.getRight());
+
       code.addInstruction(OpCode.iadd);
       code.addMaxStack(1);
+
       return new Type("I", true); //Return integer type
     }
 

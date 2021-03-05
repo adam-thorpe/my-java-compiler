@@ -1,6 +1,6 @@
 package com.adamthorpe.javacompiler.Types.Tables;
 
-import com.adamthorpe.javacompiler.Util;
+import com.adamthorpe.javacompiler.ByteConvert;
 import com.adamthorpe.javacompiler.Types.ConstantPool.*;
 
 public class ConstantPool extends DataTable<CONSTANT> {
@@ -49,20 +49,7 @@ public class ConstantPool extends DataTable<CONSTANT> {
    */
   @Override
   public byte[] getData() {
-    byte[] data = new byte[getLength()];
-    int counter = 0;
-    boolean first=true;
-
-    for (CONSTANT e : this) {
-      if(first) {
-        first=false;
-      } else {
-        System.arraycopy(e.getData(), 0, data, counter, e.getLength());
-        counter+=e.getLength();
-      }
-    }
-
-    return data;
+    return ByteConvert.toByteArr(this.subList(1, this.size()));
   }
 
   /**

@@ -109,11 +109,7 @@ public class CompilerCore {
       }
 
       //Generate code in the code generator
-      ByteCode code = new CodeGenerator(constantPool, className).run(md.getBody().get(), md.getParameters());
-
-      //Create code attribute
-      AttributesTable attributes = new AttributesTable(constantPool);
-      attributes.addCodeAttribute(code);
+      AttributesTable attributes = new CodeGenerator(constantPool, className).run(md.getBody().get(), md.getParameters());
 
       //Add method to method table
       methodsTable.insert(md.getNameAsString(), accessFlags, Util.createTypeInfo(new Type(md.getType()), paramTypes), attributes);
@@ -134,7 +130,7 @@ public class CompilerCore {
 
     //Create code attribute
     AttributesTable attributes = new AttributesTable(constantPool);
-    attributes.addCodeAttribute(code);
+    attributes.addCodeAttribute(code, new AttributesTable(constantPool));
 
     //Add method to method table
     methodsTable.insert("<init>", Modifier.PUBLIC,  "()V", attributes);

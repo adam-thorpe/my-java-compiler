@@ -3,6 +3,7 @@ package com.adamthorpe.javacompiler.Types.Tables;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.adamthorpe.javacompiler.ByteConvert;
 import com.adamthorpe.javacompiler.Types.ByteData;
 
 public abstract class DataTable<E extends ByteData> extends ArrayList<E> implements ByteData {
@@ -64,15 +65,7 @@ public abstract class DataTable<E extends ByteData> extends ArrayList<E> impleme
    * @return Byte array of data
    */
   public byte[] getData() {
-    byte[] data = new byte[getLength()];
-    int counter = 0;
-
-    for (E e : this) {
-      System.arraycopy(e.getData(), 0, data, counter, e.getLength());
-      counter+=e.getLength();
-    }
-
-    return data;
+    return ByteConvert.toByteArr(this);
   }
   
 }

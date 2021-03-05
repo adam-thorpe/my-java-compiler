@@ -20,6 +20,12 @@ public class ByteCode extends DataTable<Instruction> {
     currentIndex=0;
   }  
 
+  public void addInstruction(Instruction instruction) {
+    instruction.setIndex(currentIndex);
+    this.add(instruction);
+    currentIndex+=instruction.getOpCode().getLen();
+  }
+
   public void addInstruction(OpCode op) {
     this.add(new Instruction(op, currentIndex));
     currentIndex+=op.getLen();
@@ -30,8 +36,14 @@ public class ByteCode extends DataTable<Instruction> {
     currentIndex+=op.getLen();
   }
 
-  public void addJumpInstruction(OpCode op, int branch) {
-    
+  public void addJumpInstruction(OpCode op, int jumpToIndexOffset) {
+    this.add(new Instruction(op, currentIndex, 2, op.getLen()+jumpToIndexOffset));
+    currentIndex+=op.getLen();
+  }
+
+  public void addJumpInstruction(OpCode op, Instruction jumpTo) {
+    this.add(new JumpInstruction(op, currentIndex, jumpTo));
+    currentIndex+=op.getLen();
   }
 
   public void addMaxStack(int increment) {
@@ -48,5 +60,9 @@ public class ByteCode extends DataTable<Instruction> {
 
   public int getMaxLocals() {
     return max_locals;
+  }
+
+  public int getCurrentIndex() {
+    return currentIndex;
   }
 }
