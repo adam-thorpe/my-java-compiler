@@ -46,7 +46,7 @@ public class BooleansTest extends ClassTest {
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("True", boolean.class).invoke(
+      assertEquals(true, thisClass.getMethod("True").invoke(
         thisClass.getConstructor().newInstance(new Object[] {})
       ))
     );
@@ -57,7 +57,7 @@ public class BooleansTest extends ClassTest {
     );
 
     assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("False", boolean.class).invoke(
+      assertEquals(false, thisClass.getMethod("False").invoke(
         thisClass.getConstructor().newInstance(new Object[] {})
       ))
     );

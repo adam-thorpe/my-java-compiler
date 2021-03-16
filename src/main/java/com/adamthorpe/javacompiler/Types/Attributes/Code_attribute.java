@@ -30,7 +30,7 @@ public class Code_attribute extends Attributes_info {
     this.exception_table_length = ByteConvert.intToBytes(2, exception_table.length);
 
     this.attributes = attributes.getData();
-    this.attributes_count = ByteConvert.intToBytes(2, attributes.getLength());
+    this.attributes_count = ByteConvert.intToBytes(2, attributes.size());
 
     this.max_stack = ByteConvert.intToBytes(2, code.getMaxStack());
     this.max_locals = ByteConvert.intToBytes(2, code.getMaxLocals());

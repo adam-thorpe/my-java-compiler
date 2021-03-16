@@ -1,5 +1,6 @@
 package com.adamthorpe.javacompiler.Types.Code;
 
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapEntries;
 import com.adamthorpe.javacompiler.Types.Tables.ConstantPool;
 import com.adamthorpe.javacompiler.Types.Tables.DataTable;
 
@@ -10,9 +11,11 @@ public class ByteCode extends DataTable<Instruction> {
   private int max_stack;
   private int max_locals;
   private int currentIndex;
+  private StackMapEntries stackMapEntries;
 
-  public ByteCode(ConstantPool constantPool) {
+  public ByteCode(ConstantPool constantPool, StackMapEntries stackMapEntries) {
     this.constantPool = constantPool;
+    this.stackMapEntries = stackMapEntries;
 
     max_stack=1;
     max_locals=1;
@@ -36,13 +39,17 @@ public class ByteCode extends DataTable<Instruction> {
     currentIndex+=op.getLen();
   }
 
-  public void addJumpInstruction(OpCode op, int jumpToIndexOffset) {
-    this.add(new Instruction(op, currentIndex, 2, op.getLen()+jumpToIndexOffset));
+  public void addJumpInstruction(OpCode op, Instruction jumpTo) {
+    JumpInstruction i = new JumpInstruction(op, currentIndex, jumpTo);
+    this.add(i);
+    stackMapEntries.insertInstruction(i);
     currentIndex+=op.getLen();
   }
 
-  public void addJumpInstruction(OpCode op, Instruction jumpTo) {
-    this.add(new JumpInstruction(op, currentIndex, jumpTo));
+  public void addJumpInstruction(OpCode op, Instruction jumpTo, int jumpToIndexOffset) {
+    JumpInstruction i = new JumpInstruction(op, currentIndex, jumpTo, jumpToIndexOffset);
+    this.add(i);
+    stackMapEntries.insertInstruction(i);
     currentIndex+=op.getLen();
   }
 

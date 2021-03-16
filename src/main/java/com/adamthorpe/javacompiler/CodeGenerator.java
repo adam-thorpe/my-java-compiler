@@ -6,6 +6,10 @@ import java.util.List;
 import com.adamthorpe.javacompiler.Types.EmptyType;
 import com.adamthorpe.javacompiler.Types.LocalVariable;
 import com.adamthorpe.javacompiler.Types.Type;
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapEntries;
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapFrame;
+import com.adamthorpe.javacompiler.Types.Attributes.VerificationType_info;
+import com.adamthorpe.javacompiler.Types.Attributes.VerificationType_tag;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
 import com.adamthorpe.javacompiler.Types.Code.Instruction;
 import com.adamthorpe.javacompiler.Types.Code.OpCode;
@@ -25,6 +29,7 @@ public class CodeGenerator {
   protected ByteCode code;
 
   protected AttributesTable codeAttributes;
+  protected StackMapEntries stackMapEntries;
 
   protected boolean hasReturn=false; //TEMP
   protected LocalVariableTable localVariables;
@@ -33,6 +38,8 @@ public class CodeGenerator {
   public CodeGenerator(ConstantPool constantPool, String className) {
     this.constantPool = constantPool;
     this.codeAttributes = new AttributesTable(constantPool);
+    this.stackMapEntries = new StackMapEntries();
+
     this.localVariables = new LocalVariableTable();
     this.className = className;
   }
@@ -47,7 +54,7 @@ public class CodeGenerator {
   public AttributesTable run(BlockStmt block, List<Parameter> parameters) {
     AttributesTable attributes = new AttributesTable(constantPool);
 
-    code = new ByteCode(constantPool);
+    code = new ByteCode(constantPool, stackMapEntries);
 
     //Populate LocalVariableTable
     localVariables.add(new LocalVariable("this", new EmptyType())); //TODO
@@ -72,6 +79,7 @@ public class CodeGenerator {
 
     if (!hasReturn) code.addInstruction(OpCode.return_);
 
+    if(!stackMapEntries.isEmpty()) codeAttributes.addStackMapTableAttribute(stackMapEntries);
     attributes.addCodeAttribute(code, codeAttributes);
     return attributes;
   }
@@ -143,7 +151,7 @@ public class CodeGenerator {
       code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
       code.addInstruction(jumpToTrue);
 
-      code.addJumpInstruction(OpCode.goto_, jumpToFalse.getOpCode().getLen());
+      code.addJumpInstruction(OpCode.goto_, jumpToFalse, jumpToFalse.getOpCode().getLen());
       code.addInstruction(jumpToFalse);
 
       return new Type("Z", true); //Return boolean type

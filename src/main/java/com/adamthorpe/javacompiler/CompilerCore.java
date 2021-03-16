@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.Types.Type;
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapEntries;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
 import com.adamthorpe.javacompiler.Types.Code.OpCode;
 import com.adamthorpe.javacompiler.Types.Tables.AttributesTable;
@@ -121,7 +122,7 @@ public class CompilerCore {
    */
   protected void createConstructor() {
     //Generate code
-    ByteCode code = new ByteCode(constantPool);
+    ByteCode code = new ByteCode(constantPool, new StackMapEntries());
     code.addInstruction(OpCode.aload_0);
     code.addInstruction(OpCode.invokespecial, 
       2, constantPool.addMethod_info("java/lang/Object", "<init>", "()V")

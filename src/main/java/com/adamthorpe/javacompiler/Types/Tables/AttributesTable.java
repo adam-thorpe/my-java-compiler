@@ -1,8 +1,12 @@
 package com.adamthorpe.javacompiler.Types.Tables;
 
+import java.util.List;
+
 import com.adamthorpe.javacompiler.Types.Attributes.Attributes_info;
 import com.adamthorpe.javacompiler.Types.Attributes.Code_attribute;
 import com.adamthorpe.javacompiler.Types.Attributes.SourceFile_attribute;
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapEntries;
+import com.adamthorpe.javacompiler.Types.Attributes.StackMapFrame;
 import com.adamthorpe.javacompiler.Types.Attributes.StackMapTable_attribute;
 import com.adamthorpe.javacompiler.Types.Code.ByteCode;
 
@@ -27,8 +31,8 @@ public class AttributesTable extends DataTable<Attributes_info> {
     insert(new SourceFile_attribute(attribute_name_index, sourcefile_index));
   }
 
-  public void addStackMapTableAttribute() {
+  public void addStackMapTableAttribute(StackMapEntries entries) {
     int attribute_name_index = constantPool.addUtf8_info("StackMapTable");
-    insert(new StackMapTable_attribute(attribute_name_index));
+    insert(new StackMapTable_attribute(attribute_name_index, entries));
   }
 }

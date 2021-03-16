@@ -1,5 +1,7 @@
 package com.adamthorpe.javacompiler.Types.Attributes;
 
+import java.util.List;
+
 import com.adamthorpe.javacompiler.ByteConvert;
 
 public class StackMapTable_attribute extends Attributes_info {
@@ -7,10 +9,10 @@ public class StackMapTable_attribute extends Attributes_info {
   byte[] number_of_entries; //u2
   byte[] entries;
 
-  public StackMapTable_attribute(int attribute_name_index) {
+  public StackMapTable_attribute(int attribute_name_index, StackMapEntries entries) {
     super(attribute_name_index);
-    this.number_of_entries = new byte[2];
-    this.entries = new byte[0];
+    this.number_of_entries = ByteConvert.intToBytes(2, entries.getSize());
+    this.entries = entries.getData();
 
     setAttributeLength(getThisLength());
   }
