@@ -3,7 +3,6 @@ package com.adamthorpe.javacompiler.Visitors;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.visitor.GenericVisitorAdapter;
 
-
 public class ClassVisitor extends GenericVisitorAdapter<ClassOrInterfaceDeclaration, Void> {
 
   @Override

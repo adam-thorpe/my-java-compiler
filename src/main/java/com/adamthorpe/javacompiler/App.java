@@ -37,11 +37,11 @@ public class App {
   }
 
   /**
-   * Parses the input arguments of the executable
+   * <p>Parses the input arguments of the executable.<p>
    * 
-   * @param args - List of arguments including flags and a single path to the input file
-   * @return - The input file
-   * @throws Exception - Input errors
+   * @param args        List of arguments including flags and a single path to the input file
+   * @return            Path to the input file
+   * @throws Exception  Input errors
    */
   protected static Path parseArguments(String[] args) throws Exception {
     if (args.length == 0) {

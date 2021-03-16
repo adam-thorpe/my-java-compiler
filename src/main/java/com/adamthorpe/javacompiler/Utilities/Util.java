@@ -16,9 +16,9 @@ public class Util {
    * <code>()V</code>
    * <code>(Ljava/lang/Object;)Ljava/lang/String;</code>
    * 
-   * @param returnType the return type
-   * @param argTypes optional argument types
-   * @return type description
+   * @param returnType  The return type
+   * @param argTypes    Optional argument types
+   * @return            Type description
    */
   public static String createTypeInfo(Type returnType, List<Type> argTypes) {
     String string = "(";
@@ -35,17 +35,17 @@ public class Util {
    * <code>()V</code>
    * <code>()Ljava/lang/String;</code>
    * 
-   * @param returnType the return type
-   * @return type description
+   * @param returnType  The return type
+   * @return            Type description
    */
   public static String createTypeInfo(Type returnType) {
     return createTypeInfo(returnType, new ArrayList<>());
   }
 
   /**
-   * Writes an array of bytes to file
+   * <p>Writes an array of bytes to file.<p>
    * 
-   * @param data An array of bytes
+   * @param data  An array of bytes
    */
   public static void outputToFile(byte[] data, String destination) {
     try {

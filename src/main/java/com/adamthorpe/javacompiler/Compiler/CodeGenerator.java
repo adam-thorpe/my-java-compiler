@@ -41,11 +41,11 @@ public class CodeGenerator {
   }
 
   /**
-   * <p>Begins to start generating code from a method block.</p>
+   * <p>Generates bytecode from a method block.</p>
    * 
-   * @param block the block of code to work on
-   * @param parameters method parameters
-   * @return resulting attributes with bytecode
+   * @param block       The block of code to work on
+   * @param parameters  Method parameters
+   * @return            Resulting method attributes containing bytecode
    */
   public AttributesTable run(BlockStmt block, List<Parameter> parameters) {
     AttributesTable attributes = new AttributesTable(constantPool);
@@ -84,8 +84,8 @@ public class CodeGenerator {
    * <p>This method will determine the form of <code>expression</code> and then evaluate it further. This 
    * is a recursive function, as each expression often comprises of sub-expressions.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(Expression expression) {
     if (expression.isBinaryExpr()) {
@@ -123,8 +123,8 @@ public class CodeGenerator {
    * middle.
    * Eg. <code>a + b</code> or <code>a && b</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(BinaryExpr expression) {
 
@@ -169,8 +169,8 @@ public class CodeGenerator {
    * <p>Evaluates a boolean literal.
    * Eg. <code>true</code> or <code>false</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(BooleanLiteralExpr expression) {
     boolean value = expression.getValue();
@@ -188,8 +188,8 @@ public class CodeGenerator {
    * <p>Evaluates a field access expression.
    * Eg. <code>System.out</code> or <code>myField1</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(FieldAccessExpr expression) {
     // Get scope
@@ -213,8 +213,8 @@ public class CodeGenerator {
    * <p>Evaluates an integer literal expression.
    * Eg. <code>5</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(IntegerLiteralExpr expression) {
     int value = expression.asNumber().intValue(); //Evaluate integer value of the expression
@@ -242,8 +242,8 @@ public class CodeGenerator {
    * <p>Evaluates a method call expression.
    * Eg. <code>method1(arg1);</code> or <code>class.getThis();</code>.</p>
    * 
-   * @param expression
-   * @return
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(MethodCallExpr expression) {
     //Evaluate scope
@@ -278,8 +278,8 @@ public class CodeGenerator {
    * <p>Evaluates a name expression.
    * Eg. <code>java.lang.String</code> or <code>var1</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(NameExpr expression) {
     //Get the type of the name expression
@@ -308,8 +308,8 @@ public class CodeGenerator {
    * <p>Evaluates a String literal expression.
    * Eg. <code>"Hello World!"</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(StringLiteralExpr expression) {
     code.addInstruction(OpCode.ldc,
@@ -324,8 +324,8 @@ public class CodeGenerator {
    * <p>Evaluates a variable declaration. Can be a multitide of variable declarations.
    * Eg. <code>int a = 5;</code> or <code>String var1, var2;</code>.</p>
    * 
-   * @param expression the input expression
-   * @return expression Type
+   * @param expression  The input expression
+   * @return            Expression Type
    */
   protected Type evaluateExpression(VariableDeclarationExpr expression) {
 
@@ -367,7 +367,7 @@ public class CodeGenerator {
    * <p>Evaluates the expression in a return statement
    * Eg. <code>return var1;</code> or <code>return 2+3;</code>.</p>
    * 
-   * @param expression input return expression
+   * @param expression  Input return expression
    */
   protected void evaluateReturnStatement(Expression expression) {
     Type returnType = evaluateExpression(expression);
@@ -378,5 +378,4 @@ public class CodeGenerator {
       code.addInstruction(OpCode.areturn);
     }
   }
-  
 }

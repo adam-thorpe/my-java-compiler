@@ -9,9 +9,9 @@ public class ByteConvert {
   /**
    * <p>Converts a hex string into an array of bytes.</p>
    * 
-   * @param hex         the input hex stream
-   * @return            a byte array
-   * @throws Exception  if <code>hex</code> contains an invalid character
+   * @param hex         The input hex stream
+   * @return            A byte array
+   * @throws Exception  If <code>hex</code> contains an invalid character
    */
   public static byte[] hexToByteArray(String hex) throws Exception {
 
@@ -37,9 +37,9 @@ public class ByteConvert {
    * <p>Converts a hex character into an integer value.
    * Ranges from 0 to 127 and -128 to -1.</p>
    * 
-   * @param letter      the hex character
-   * @return            an integer representation of <code>letter</code>
-   * @throws Exception  if the <code>letter</code> if not a valid hex character
+   * @param letter      The hex character
+   * @return            An integer representation of <code>letter</code>
+   * @throws Exception  If the <code>letter</code> if not a valid hex character
    */
   protected static int getDigit(char letter) throws Exception {
     int digit = Character.digit(letter, 16);
@@ -54,9 +54,9 @@ public class ByteConvert {
    * <p>Converts an integer into a byte representation, conforming to a byte <code>length</code>.
    * It does this by padding any extra bytes.</p>
    * 
-   * @param length the length of the new array
-   * @param data the data being converted into bytes
-   * @return a byte array
+   * @param length  The length of the new array
+   * @param data    The data being converted into bytes
+   * @return        A byte array
    */
   public static byte[] intToBytes(int length, int data) {
     byte[] output = new byte[length];
@@ -72,8 +72,8 @@ public class ByteConvert {
    * <p>Converts one or many byte arrays into a single byte array.
    * It does this by copying each element into a new array.</p>
    * 
-   * @param data one or more byte arrays
-   * @return a single byte array
+   * @param data  One or more byte arrays
+   * @return      A single byte array
    */
   public static byte[] toByteArr(byte[] ...data) {
 
@@ -100,8 +100,8 @@ public class ByteConvert {
    * <p>Converts an arbitary list of byte arrays into a single byte array.
    * It does this by copying each element into a new array.</p>
    * 
-   * @param dataArray list of byte arrays
-   * @return a single byte array
+   * @param dataArray List of byte arrays
+   * @return          A single byte array
    */
   public static byte[] toByteArr(List<? extends ByteData> dataArray) {
     
