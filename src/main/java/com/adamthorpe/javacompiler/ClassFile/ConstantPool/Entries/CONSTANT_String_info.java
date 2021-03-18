@@ -2,6 +2,9 @@ package com.adamthorpe.javacompiler.ClassFile.ConstantPool.Entries;
 
 import com.adamthorpe.javacompiler.Utilities.ByteConvert;
 
+/**
+ * <p>To find out more, please visit: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.3</p>
+ */
 public class CONSTANT_String_info extends CONSTANT {
   
   protected byte[] string_index; //u2

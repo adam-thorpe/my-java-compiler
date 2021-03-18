@@ -1,8 +1,6 @@
-package com.adamthorpe.javacompiler.ClassFile;
+package com.adamthorpe.javacompiler.ClassFile.LocalVariables;
 
 import java.util.ArrayList;
-
-import com.adamthorpe.javacompiler.ClassFile.LocalVariable;
 
 public class LocalVariableTable extends ArrayList<LocalVariable> {
 

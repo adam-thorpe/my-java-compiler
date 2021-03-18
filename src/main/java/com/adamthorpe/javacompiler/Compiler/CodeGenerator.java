@@ -3,8 +3,8 @@ package com.adamthorpe.javacompiler.Compiler;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.adamthorpe.javacompiler.ClassFile.LocalVariable;
-import com.adamthorpe.javacompiler.ClassFile.LocalVariableTable;
+import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariable;
+import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariableTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
@@ -50,7 +50,7 @@ public class CodeGenerator {
   public AttributesTable run(BlockStmt block, List<Parameter> parameters) {
     AttributesTable attributes = new AttributesTable(constantPool);
 
-    code = new ByteCode(constantPool, stackMapEntries);
+    code = new ByteCode(stackMapEntries);
 
     //Populate LocalVariableTable
     localVariables.add(new LocalVariable("this", new EmptyType())); //TODO
@@ -75,7 +75,7 @@ public class CodeGenerator {
 
     if (!hasReturn) code.addInstruction(OpCode.return_);
 
-    if(!stackMapEntries.isEmpty()) codeAttributes.addStackMapTableAttribute(stackMapEntries);
+    if(!stackMapEntries.instructionsIsEmpty()) codeAttributes.addStackMapTableAttribute(stackMapEntries);
     attributes.addCodeAttribute(code, codeAttributes);
     return attributes;
   }

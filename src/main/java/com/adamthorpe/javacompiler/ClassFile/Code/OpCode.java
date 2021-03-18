@@ -1,5 +1,10 @@
 package com.adamthorpe.javacompiler.ClassFile.Code;
 
+/**
+ * <p>Contains the instruction number and size of the arguments for each instruction.</p>
+ * 
+ * <p>To find out more, please visit: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-7.html</p>
+ */
 public enum OpCode {
   iconst_m1 (2, 1),
   iconst_0 (3, 1),
@@ -43,10 +48,20 @@ public enum OpCode {
     this.len = len;
   }
 
+  /**
+   * <p>Returns the instruction number of this op.</p>
+   * 
+   * @return  Instruction number
+   */
   public int getCode() {
     return opCode;
   }
 
+  /**
+   * <p>Returns the length of the arguments of this op.</p>
+   * 
+   * @return  Arguments length
+   */
   public int getLen() {
     return len;
   }

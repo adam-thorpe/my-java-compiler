@@ -1,19 +1,16 @@
 package com.adamthorpe.javacompiler.Compiler;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.ClassFile.ClassFile;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
-import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
 import com.adamthorpe.javacompiler.ClassFile.Code.OpCode;
 import com.adamthorpe.javacompiler.ClassFile.ConstantPool.ConstantPool;
 import com.adamthorpe.javacompiler.ClassFile.FieldsOrMethods.FieldOrMethodTable;
+import com.adamthorpe.javacompiler.ClassFile.Interfaces.InterfaceTable;
 import com.adamthorpe.javacompiler.Utilities.Util;
 import com.adamthorpe.javacompiler.Visitors.ClassVisitor;
 import com.adamthorpe.javacompiler.Visitors.MethodVisitor;
@@ -21,32 +18,46 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
+/**
+ * <p>The core of Java Compiler. This class does most of the organising and creating data
+ * structures for all of the components.</p>
+ */
 public class CompilerCore {
 
-  private CompilationUnit cu;
-  private ConstantPool constantPool;
-  private int thisClassIndex;
-  private int superClassIndex;
-  private String className;
-  private String filePath;
+  protected CompilationUnit cu;
+  protected String className;
+  protected String filePath;
 
-  byte[] interfacesTable = new byte[0]; //TODO
-  FieldOrMethodTable fieldsTable;
-  FieldOrMethodTable methodsTable;
-  AttributesTable attributesTable;
+  // Classfile data
+  protected ConstantPool constantPool;
+  protected int thisClassIndex;
+  protected int superClassIndex;
+  protected InterfaceTable interfacesTable;
+  protected FieldOrMethodTable fieldsTable;
+  protected FieldOrMethodTable methodsTable;
+  protected AttributesTable attributesTable;
 
+  /**
+   * <p>Constructs the class</p>
+   * 
+   * @param cu        The <code>CompilationUnit</code> of JavaParser. This contains the syntax tree of our program
+   * @param filePath  Path to our file. Used as the output destination
+   */
   public CompilerCore(CompilationUnit cu, String filePath) {
     this.cu = cu;
-    this.constantPool = new ConstantPool();
     this.filePath = filePath;
 
+    this.constantPool = new ConstantPool();
+    this.interfacesTable = new InterfaceTable(constantPool);
     this.fieldsTable = new FieldOrMethodTable(constantPool);
     this.methodsTable = new FieldOrMethodTable(constantPool);
     this.attributesTable = new AttributesTable(constantPool);
   }
 
+  /**
+   * <p>Parses the syntax tree and creates our resulting classfile.</p> 
+   */
   public void parse() {
     ClassOrInterfaceDeclaration classDeclaration = new ClassVisitor().visit(cu, null);
     List<MethodDeclaration> methodDeclarations = new MethodVisitor().visit(cu, null);
@@ -68,30 +79,26 @@ public class CompilerCore {
   }
 
   /**
-   * <p>Creates the data for the class.</p>
+   * <p>Creates information about the class being compiled.</p>
    * 
-   * @param classDeclaration info about the class
+   * @param classDeclaration  Class data
    */
   protected void createClassInfo(ClassOrInterfaceDeclaration classDeclaration) {
     // Define this class
     className = classDeclaration.getNameAsString();
     thisClassIndex = constantPool.addClass_info(className);
     
+    // Define the super class
     if (classDeclaration.getExtendedTypes().isEmpty()) {
       // Add default superclass "Object"
       superClassIndex = constantPool.addClass_info("java/lang/Object");
-    } else {
-      //Superclasses
-      for (ClassOrInterfaceType superClassType : classDeclaration.getExtendedTypes()) {
-        // TODO
-      }
     }
   }
 
   /**
-   * <p>Creates the data for each declared method and any default constructors.</p>
+   * <p>Creates information for each declared and non-declared method.</p>
    * 
-   * @param methodDeclarations the method declarations
+   * @param methodDeclarations  Method Declaration data
    */
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
 
@@ -119,11 +126,11 @@ public class CompilerCore {
   }
 
   /**
-   * <p>Creates the data for a default constructor.</p>
+   * <p>Creates information for the default non-declared constructor.</p>
    */
   protected void createConstructor() {
     //Generate code
-    ByteCode code = new ByteCode(constantPool, new StackMapEntries());
+    ByteCode code = new ByteCode();
     code.addInstruction(OpCode.aload_0);
     code.addInstruction(OpCode.invokespecial, 
       2, constantPool.addMethod_info("java/lang/Object", "<init>", "()V")
@@ -139,7 +146,7 @@ public class CompilerCore {
   }
 
   /**
-   * <p>Creates the data for the main attributes table.</p>
+   * <p>Creates information for the main attributes table.</p>
    */
   protected void createAttributes() {
     attributesTable.addSourceFileAttribute(className + ".java");

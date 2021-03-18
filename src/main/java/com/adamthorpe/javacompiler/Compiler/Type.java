@@ -13,7 +13,7 @@ public class Type {
   /**
    * <p>Constructor that builds a type from a JavaParser Type.</p>
    * 
-   * @param typeInfo JavaParser Type info
+   * @param typeInfo  JavaParser Type info
    */
   public Type(com.github.javaparser.ast.type.Type typeInfo) {
     //calculate array sublevels
@@ -53,7 +53,7 @@ public class Type {
   /**
    * <p>Constructor that builds a type from a JavaParser ResolvedType.</p>
    * 
-   * @param typeInfo JavaParser ResolvedType info
+   * @param typeInfo  JavaParser ResolvedType info
    */
   public Type(ResolvedType typeInfo) {
     //primitives
@@ -88,8 +88,8 @@ public class Type {
    * <p>Constructor that builds a type from a string. The <code>isPrimitive</code> field indicates whether 
    * this is a primitive data type.</p>
    * 
-   * @param typeInfo string type info
-   * @param isPrimitive whether the given data is a primitive data type
+   * @param typeInfo    String type info
+   * @param isPrimitive Whether the given data is a primitive data type
    */
   public Type(String typeInfo, boolean isPrimitive) {
     this.isPrimitive=isPrimitive;
@@ -101,9 +101,9 @@ public class Type {
    * <p>Constructor that builds a type from a string. The <code>isPrimitive</code> field indicates whether 
    * this is a primitive data type. Allows for array data types</p>
    * 
-   * @param typeInfo string type info
-   * @param isPrimitive whether the given data is a primitive data type
-   * @param arrayLevel the number of array levels attached to this data type. Eg. int[][] = 2 array levels
+   * @param typeInfo    String type info
+   * @param isPrimitive Whether the given data is a primitive data type
+   * @param arrayLevel  The number of array levels attached to this data type. Eg. int[][] = 2 array levels
    */
   public Type(String typeInfo, boolean isPrimitive, int arrayLevel) {
     this(typeInfo, isPrimitive);
@@ -116,8 +116,8 @@ public class Type {
    * Eg.
    * <code>java.lang.String</code> -> <code>java/lang/String</code>
    * 
-   * @param input the input string
-   * @return formatted string
+   * @param input The input string
+   * @return      Formatted string
    */
   protected String format(String input) {
     return input.replace('.', '/');
@@ -129,7 +129,7 @@ public class Type {
    * Eg.
    * <code>java/lang/String</code>
    * 
-   * @return name of the type
+   * @return  Name of the type
    */
   public String getName() {
     return name;
@@ -142,7 +142,7 @@ public class Type {
    * <code>Ljava/lang/String;</code>
    * or <code>I</code>
    * 
-   * @return name of the type in byte-code
+   * @return  Name of the type in byte-code
    */
   public String getFormalName() {
     String arrayChars="";
@@ -157,10 +157,20 @@ public class Type {
     }
   }
 
+  /**
+   * <p>Check if this is the primitive integer type.</p>
+   * 
+   * @return  <code>true</code> if this is an integer type else <code>false</code>
+   */
   public boolean isInt() {
     return name.equals("I") && isPrimitive;
   }
 
+  /**
+   * <p>Check if this is the primitive boolean type.</p>
+   * 
+   * @return  <code>true</code> if this is a boolean type else <code>false</code>
+   */
   public boolean isBool() {
     return name.equals("Z") && isPrimitive;
   }

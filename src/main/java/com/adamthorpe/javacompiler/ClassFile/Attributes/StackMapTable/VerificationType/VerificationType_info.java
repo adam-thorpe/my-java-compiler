@@ -3,6 +3,11 @@ package com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.Verificat
 import com.adamthorpe.javacompiler.ClassFile.ByteData;
 import com.adamthorpe.javacompiler.Utilities.ByteConvert;
 
+/**
+ * <p>Contains data for the VerificationType_info.</p>
+ * 
+ * <p>To find out more, please visit: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7.4</p>
+ */
 public class VerificationType_info implements ByteData {
   
   protected byte[] tag; //u1
@@ -20,6 +25,4 @@ public class VerificationType_info implements ByteData {
   public byte[] getData() {
     return tag;
   }
-
-
 }

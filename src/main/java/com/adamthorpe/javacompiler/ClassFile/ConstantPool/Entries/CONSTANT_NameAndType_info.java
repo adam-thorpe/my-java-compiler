@@ -2,10 +2,13 @@ package com.adamthorpe.javacompiler.ClassFile.ConstantPool.Entries;
 
 import com.adamthorpe.javacompiler.Utilities.ByteConvert;
 
+/**
+ * <p>To find out more, please visit: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.6</p>
+ */
 public class CONSTANT_NameAndType_info extends CONSTANT {
   
-  protected byte[] name_index; //u2
-  protected byte[] descriptor_index; //u2
+  protected byte[] name_index;        //u2
+  protected byte[] descriptor_index;  //u2
 
   public CONSTANT_NameAndType_info(int name_index_pos, int descriptor_index_pos) {
     super(12);

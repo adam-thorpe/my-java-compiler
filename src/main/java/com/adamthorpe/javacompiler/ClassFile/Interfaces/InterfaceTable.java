@@ -12,7 +12,5 @@ public class InterfaceTable extends DataTable<Interface_info>{
     super();
     this.constantPool = constantPool;
   }
-
-  //WIP
   
 }
