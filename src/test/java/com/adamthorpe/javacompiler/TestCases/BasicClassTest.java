@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
 import com.adamthorpe.javacompiler.TestCase;
+import com.adamthorpe.javacompiler.TestCaseInterface;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import org.junit.Test;
  * Test bin/BasicClass/BasicClass.java
  * Should compile the class to the same directory
  */
-public class BasicClassTest extends TestCase {
+public class BasicClassTest extends TestCase implements TestCaseInterface {
 
   public BasicClassTest() {
     super("bin/BasicClass", "BasicClass");
