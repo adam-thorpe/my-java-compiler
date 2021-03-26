@@ -3,15 +3,16 @@ package com.adamthorpe.javacompiler.TestCases;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
-import com.adamthorpe.javacompiler.ClassTest;
+import com.adamthorpe.javacompiler.TestCase;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BooleansTest extends ClassTest {
+public class BooleansTest extends TestCase {
 
   public BooleansTest() {
     super("bin/Booleans", "Booleans");
@@ -28,127 +29,61 @@ public class BooleansTest extends ClassTest {
   }
 
   @Test
-  public void testConstructor() {
+  public void testConstructor() throws Exception {
     assertEquals(1, thisClass.getConstructors().length);
-
-    assertDoesNotThrow(() -> 
-      testConstructor(thisClass.getConstructor(), Modifier.PUBLIC)
-    );
+    testConstructor(thisClass.getConstructor(), Modifier.PUBLIC);
   }
 
   @Test
   public void testMethods() {
     assertEquals(6, thisClass.getDeclaredMethods().length);
+  }
 
-    //Test method True
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("True"), Modifier.PUBLIC, boolean.class)
-    );
+  @Test
+  public void testMethodTrue() throws Exception {
+    Method m = thisClass.getMethod("True");
+    testMethod(m, Modifier.PUBLIC, boolean.class);
+    testMethodBody(m, null, true);
+  }
 
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("True").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
-      ))
-    );
+  @Test
+  public void testMethodFalse() throws Exception {
+    Method m = thisClass.getMethod("False");
+    testMethod(m, Modifier.PUBLIC, boolean.class);
+    testMethodBody(m, null, false);
+  }
 
-    //Test method False
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("False"), Modifier.PUBLIC, boolean.class)
-    );
+  @Test
+  public void testMethodTestAND() throws Exception {
+     Method m = thisClass.getMethod("TestAND");
+     testMethod(m, Modifier.PUBLIC, boolean.class);
+     testMethodBody(m, null, false);
+  }
 
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("False").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
-      ))
-    );
+  @Test
+  public void testMethodTestOR() throws Exception {
+    Method m = thisClass.getMethod("TestOR");
+    testMethod(m, Modifier.PUBLIC, boolean.class);
+    testMethodBody(m, null, true);
+  }
 
-    //Test method TestAND
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("TestAND"), Modifier.PUBLIC, boolean.class)
-    );
+  @Test
+  public void testMethodTestAND2() throws Exception {
+     Method m = thisClass.getMethod("TestAND2", boolean.class, boolean.class);
+     testMethod(m, Modifier.PUBLIC, boolean.class);
+     testMethodBody(m, new Object[]{true, true}, true);
+     testMethodBody(m, new Object[]{true, false}, false);
+     testMethodBody(m, new Object[]{false, true}, false);
+     testMethodBody(m, new Object[]{false, false}, false);
+  }
 
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("TestAND").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
-      ))
-    );
-
-    //Test method TestOR
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("TestOR"), Modifier.PUBLIC, boolean.class)
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("TestOR").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
-      ))
-    );
-
-    //Test method TestAND2
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("TestAND2", boolean.class, boolean.class), Modifier.PUBLIC, boolean.class)
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        true, true
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        true, false
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        false, true
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("TestAND2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        false, false
-      ))
-    );
-
-    //Test method TestOR2
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("TestOR2", boolean.class, boolean.class), Modifier.PUBLIC, boolean.class)
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        true, true
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        true, false
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(true, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        false, true
-      ))
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals(false, thisClass.getMethod("TestOR2", boolean.class, boolean.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}),
-        false, false
-      ))
-    );
-
+  @Test
+  public void testMethodTestOR2() throws Exception {
+     Method m = thisClass.getMethod("TestOR2", boolean.class, boolean.class);
+     testMethod(m, Modifier.PUBLIC, boolean.class);
+     testMethodBody(m, new Object[]{true, true}, true);
+     testMethodBody(m, new Object[]{true, false}, true);
+     testMethodBody(m, new Object[]{false, true}, true);
+     testMethodBody(m, new Object[]{false, false}, false);
   }
 }

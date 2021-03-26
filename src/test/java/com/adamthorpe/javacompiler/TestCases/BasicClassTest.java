@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
-import com.adamthorpe.javacompiler.ClassTest;
+import com.adamthorpe.javacompiler.TestCase;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import org.junit.Test;
  * Test bin/BasicClass/BasicClass.java
  * Should compile the class to the same directory
  */
-public class BasicClassTest extends ClassTest {
+public class BasicClassTest extends TestCase {
 
   public BasicClassTest() {
     super("bin/BasicClass", "BasicClass");
@@ -32,20 +32,18 @@ public class BasicClassTest extends ClassTest {
   }
 
   @Test
-  public void testConstructor() {
+  public void testConstructor() throws Exception {
     assertEquals(1, thisClass.getConstructors().length);
-
-    assertDoesNotThrow(() -> 
-      testConstructor(thisClass.getConstructor(), Modifier.PUBLIC)
-    );
+    testConstructor(thisClass.getConstructor(), Modifier.PUBLIC);
   }
 
   @Test
   public void testMethods() {
     assertEquals(1, thisClass.getDeclaredMethods().length);
+  }
 
-    assertDoesNotThrow(() ->
-      testMethod(thisClass.getMethod("A"), Modifier.PUBLIC, void.class)
-    );
+  @Test
+  public void testMethodA() throws Exception {
+    testMethod(thisClass.getMethod("A"), Modifier.PUBLIC, void.class);
   }
 }

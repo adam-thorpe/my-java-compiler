@@ -5,10 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
-import com.adamthorpe.javacompiler.ClassTest;
+import com.adamthorpe.javacompiler.TestCase;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import org.junit.Test;
 /**
  * Test bin/HelloWorld/HelloWorld.java
  */
-public class HelloWorldTest extends ClassTest {
+public class HelloWorldTest extends TestCase {
 
   public HelloWorldTest() {
     super("bin/HelloWorld", "HelloWorld");
@@ -33,31 +34,27 @@ public class HelloWorldTest extends ClassTest {
   }
 
   @Test
-  public void testConstructor() {
+  public void testConstructor() throws Exception {
     assertEquals(1, thisClass.getConstructors().length);
-
-    assertDoesNotThrow(() -> 
-      testConstructor(thisClass.getConstructor(), Modifier.PUBLIC)
-    );
+    testConstructor(thisClass.getConstructor(), Modifier.PUBLIC);
   }
 
   @Test
   public void testMethods() {
     assertEquals(1, thisClass.getDeclaredMethods().length);
-
-    assertDoesNotThrow(() -> 
-      testMethod(thisClass.getMethod("main", String[].class), Modifier.PUBLIC+Modifier.STATIC, void.class)
-    );
   }
 
   @Test
-  public void testOutputStream() throws Exception {
+  public void testMethodMain() throws Exception {
+    Method method = thisClass.getMethod("main", String[].class);
+    testMethod(method, Modifier.PUBLIC+Modifier.STATIC, void.class);
+
     ByteArrayOutputStream outStream = new ByteArrayOutputStream();
     System.setOut(new PrintStream(outStream));
 
     Object[] args = new Object[1];
     args[0] = new String[]{};
-    thisClass.getMethod("main", String[].class).invoke(null, args);
+    method.invoke(null, args);
     
     assertEquals("Hello World!", outStream.toString().trim());
   }

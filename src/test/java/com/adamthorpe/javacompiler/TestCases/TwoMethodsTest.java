@@ -3,15 +3,16 @@ package com.adamthorpe.javacompiler.TestCases;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
-import com.adamthorpe.javacompiler.ClassTest;
+import com.adamthorpe.javacompiler.TestCase;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TwoMethodsTest extends ClassTest {
+public class TwoMethodsTest extends TestCase {
 
   public TwoMethodsTest() {
     super("bin/TwoMethods", "TwoMethods");
@@ -28,36 +29,29 @@ public class TwoMethodsTest extends ClassTest {
   }
 
   @Test
-  public void testConstructor() {
+  public void testConstructor() throws Exception {
     assertEquals(1, thisClass.getConstructors().length);
-
-    assertDoesNotThrow(() -> testConstructor(thisClass.getConstructor(), Modifier.PUBLIC));
+    testConstructor(thisClass.getConstructor(), Modifier.PUBLIC);
   }
 
   @Test
   public void testMethods() {
-    assertEquals(2, thisClass.getDeclaredMethods().length);
+    assertEquals(2, thisClass.getDeclaredMethods().length);    
+  }
 
-    // Test method A
-    assertDoesNotThrow(() -> testMethod(thisClass.getMethod("A", int.class), Modifier.PUBLIC, int.class));
+  @Test
+  public void testMethodA() throws Exception {
+    Method method = thisClass.getMethod("A", int.class);
+    testMethod(method, Modifier.PUBLIC, int.class);
+    testMethodBody(method, new Object[]{5}, 5);
+    testMethodBody(method, new Object[]{100}, 100);
+    testMethodBody(method, new Object[]{-1}, -1);
+  }
 
-    int input = 5;
-    assertDoesNotThrow(() -> 
-      assertEquals(input, thisClass.getMethod("A", int.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}), 
-        input
-      ))
-    );
-
-    // Test method B
-    assertDoesNotThrow(() -> 
-      testMethod(thisClass.getMethod("B"), Modifier.PUBLIC, String.class)
-    );
-
-    assertDoesNotThrow(() -> 
-      assertEquals("Hello", thisClass.getMethod("B").invoke(
-        thisClass.getConstructor().newInstance(new Object[] {})
-      ))
-    );
+  @Test
+  public void testMethodB() throws Exception {
+    Method method = thisClass.getMethod("B");
+    testMethod(method, Modifier.PUBLIC, String.class);
+    testMethodBody(method, null, "Hello");
   }
 }

@@ -1,6 +1,7 @@
 package com.adamthorpe.javacompiler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -11,13 +12,13 @@ import java.net.URLClassLoader;
 
 import org.junit.Before;
 
-public abstract class ClassTest {
+public abstract class TestCase {
 
   protected String classPath;
   protected String className;
   protected Class<?> thisClass;
 
-  public ClassTest(String classPath, String className) {
+  public TestCase(String classPath, String className) {
     this.classPath=classPath;
     this.className=className;
 	}
@@ -46,36 +47,51 @@ public abstract class ClassTest {
   /**
    * A very shallow test of a class's details
    * 
-   * @param className the expected class name
-   * @param superclassType the expected superclass type
-   * @param accessModifer the expected access modifier
+   * @param className       The expected class name
+   * @param superclassType  The expected superclass type
+   * @param accessModifer   The expected access modifier
    */
   public void testGeneralInfo(String className, Class<?> superclassType, int accessModifer) {
     assertEquals(className, thisClass.getName());
     assertEquals(superclassType, thisClass.getSuperclass());
     assertEquals(accessModifer, thisClass.getModifiers());
-
   }
 
   /**
    * A very shallow test of a constructor
    * 
-   * @param constructor the constructor
-   * @param accessModifer the expected access modifier
+   * @param constructor   The constructor
+   * @param accessModifer The expected access modifier
    */
   public void testConstructor(Constructor<?> constructor, int accessModifer) {
     assertEquals(accessModifer, constructor.getModifiers());
   }
 
   /**
-   * A very shallow test of a method
+   * A very shallow test of a method's descriptor
    * 
-   * @param method the method
-   * @param accessModifier the expected access modifier
-   * @param returnType the expected return type
+   * @param method          The method
+   * @param accessModifier  The expected access modifier
+   * @param returnType      The expected return type
    */
   public void testMethod(Method method, int accessModifer, Class<?> returnType) {
     assertEquals(accessModifer, method.getModifiers());
     assertEquals(returnType, method.getReturnType());
+  }
+
+  /**
+   * A test of a method's body and return value
+   * 
+   * @param method      The method
+   * @param methodInit  Method inititaliser
+   * @param expected    The expected return value
+   */
+  public void testMethodBody(Method method, Object[] methodInit, Object expected) {
+    assertDoesNotThrow(() -> 
+      assertEquals(expected, method.invoke(
+        thisClass.getConstructor().newInstance(new Object[] {}),
+        methodInit
+      ))
+    );
   }
 }

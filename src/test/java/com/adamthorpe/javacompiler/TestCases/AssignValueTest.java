@@ -3,15 +3,16 @@ package com.adamthorpe.javacompiler.TestCases;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
-import com.adamthorpe.javacompiler.ClassTest;
+import com.adamthorpe.javacompiler.TestCase;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class AssignValueTest extends ClassTest {
+public class AssignValueTest extends TestCase {
 
   public AssignValueTest() {
     super("bin/AssignValue", "AssignValue");
@@ -28,25 +29,21 @@ public class AssignValueTest extends ClassTest {
   }
 
   @Test
-  public void testConstructor() {
+  public void testConstructor() throws Exception {
     assertEquals(1, thisClass.getConstructors().length);
-
-    assertDoesNotThrow(() -> testConstructor(thisClass.getConstructor(), Modifier.PUBLIC));
+    testConstructor(thisClass.getConstructor(), Modifier.PUBLIC);
   }
 
   @Test
   public void testMethods() {
     assertEquals(1, thisClass.getDeclaredMethods().length);
+  }
 
-    // Test method A
-    assertDoesNotThrow(() -> testMethod(thisClass.getMethod("addFunction", int.class), Modifier.PUBLIC, int.class));
-
-    int input = 5;
-    assertDoesNotThrow(() -> 
-      assertEquals(10, thisClass.getMethod("addFunction", int.class).invoke(
-        thisClass.getConstructor().newInstance(new Object[] {}), 
-        input
-      ))
-    );
+  @Test
+  public void testMethodAddFunction() throws Exception {
+    Method method = thisClass.getMethod("addFunction", int.class);
+    testMethod(method, Modifier.PUBLIC, int.class);
+    testMethodBody(method, new Object[]{5}, 10);
+    testMethodBody(method, new Object[]{100}, 105);
   }
 }
