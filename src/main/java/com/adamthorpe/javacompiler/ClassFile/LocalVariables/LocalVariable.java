@@ -9,10 +9,12 @@ public class LocalVariable {
   
   protected String name;
   protected Type type;
+  protected int index;
 
-  public LocalVariable(String name, Type type) {
+  public LocalVariable(String name, Type type, int index) {
     this.name=name;
     this.type=type;
+    this.index=index;
   }
 
   /**
@@ -31,5 +33,14 @@ public class LocalVariable {
    */
   public Type getType() {
     return type;
+  }
+
+  /**
+   * <p>Get the index of where the variable was declared.</p>
+   * 
+   * @return index
+   */
+  public int getIndex() {
+    return index;
   }
 }

@@ -6,6 +6,7 @@ package com.adamthorpe.javacompiler.ClassFile.Code;
  * <p>To find out more, please visit: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-7.html</p>
  */
 public enum OpCode {
+  nop (0, 1),
   iconst_m1 (2, 1),
   iconst_0 (3, 1),
   iconst_1 (4, 1),

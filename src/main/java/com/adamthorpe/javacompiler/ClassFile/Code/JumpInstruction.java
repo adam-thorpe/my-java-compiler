@@ -11,27 +11,27 @@ import com.adamthorpe.javacompiler.Utilities.ByteConvert;
 public class JumpInstruction extends Instruction {
 
   protected Instruction jumpTo;
-  protected int offset;
+  protected int extraOffset;
 
   public JumpInstruction(OpCode op, int index, Instruction jumpTo) {
     super(op, index);
     this.args = new byte[2];
     this.jumpTo = jumpTo;
-    this.offset=0;
+    this.extraOffset=0;
   }
 
-  public JumpInstruction(OpCode op, int index, Instruction jumpTo, int offset) {
+  public JumpInstruction(OpCode op, int index, Instruction jumpTo, int extraOffset) {
     this(op, index, jumpTo);
-    this.offset=offset;
+    this.extraOffset=extraOffset;
   }
 
   /**
-   * <p>Calculates the index of the instruction to jump to.</p>
+   * <p>Calculates the jump offset index.</p>
    * 
-   * @return  Jump index
+   * @return  Offset of jump
    */
-  public int calculateJump() {
-    int jump = jumpTo.getIndex()-index+offset;
+  public int calculateJumpOffset() {
+    int jump = jumpTo.getIndex()-index+extraOffset;
     args = ByteConvert.intToBytes(2, jump);
     
     return jump;
@@ -39,7 +39,17 @@ public class JumpInstruction extends Instruction {
 
   @Override
   public byte[] getData() {
-    calculateJump();
+    calculateJumpOffset();
     return ByteConvert.toByteArr(opcode, args);
+  }
+
+  @Override
+  public boolean isJumpInstruction() {
+    return true;
+  }
+
+  @Override
+  public JumpInstruction toJumpInstruction() {
+    return this;
   }
 }

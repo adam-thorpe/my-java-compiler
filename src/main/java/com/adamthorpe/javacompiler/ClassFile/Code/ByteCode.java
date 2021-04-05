@@ -1,7 +1,6 @@
 package com.adamthorpe.javacompiler.ClassFile.Code;
 
 import com.adamthorpe.javacompiler.ClassFile.DataTable;
-import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 
 /**
  * <p>Contains a list of instructions in ByteCode form and any other assets.</p>
@@ -12,18 +11,12 @@ public class ByteCode extends DataTable<Instruction> {
   protected int max_stack;
   protected int max_locals;
   protected int currentIndex;
-  protected StackMapEntries stackMapEntries;
 
   public ByteCode() {
     max_stack=1;
     max_locals=1;
     currentIndex=0;
-  }  
-
-  public ByteCode(StackMapEntries stackMapEntries) {
-    this();
-    this.stackMapEntries = stackMapEntries;
-  }  
+  }
 
   /**
    * <p>Add an instruction to the list of bytecode instructions.</p>
@@ -68,9 +61,7 @@ public class ByteCode extends DataTable<Instruction> {
    * @param jumpTo  Instruction to jump to
    */
   public void addJumpInstruction(OpCode op, Instruction jumpTo) {
-    JumpInstruction i = new JumpInstruction(op, currentIndex, jumpTo);
-    this.add(i);
-    stackMapEntries.insertInstruction(i);
+    this.add(new JumpInstruction(op, currentIndex, jumpTo));
     currentIndex+=op.getLen();
   }
 
@@ -83,9 +74,7 @@ public class ByteCode extends DataTable<Instruction> {
    * @param jumpToIndexOffset Additional offset
    */
   public void addJumpInstruction(OpCode op, Instruction jumpTo, int jumpToIndexOffset) {
-    JumpInstruction i = new JumpInstruction(op, currentIndex, jumpTo, jumpToIndexOffset);
-    this.add(i);
-    stackMapEntries.insertInstruction(i);
+    this.add(new JumpInstruction(op, currentIndex, jumpTo, jumpToIndexOffset));
     currentIndex+=op.getLen();
   }
 

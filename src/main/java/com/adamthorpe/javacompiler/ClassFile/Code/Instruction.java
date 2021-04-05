@@ -65,4 +65,22 @@ public class Instruction implements ByteData {
   public byte[] getData() {
     return ByteConvert.toByteArr(opcode, args);
   }
+
+  /**
+   * 
+   * 
+   * @return
+   */
+  public boolean isJumpInstruction() {
+    return false;
+  }
+
+  /**
+   * 
+   * 
+   * @return
+   */
+  public JumpInstruction toJumpInstruction() {
+    return null;
+  }
 }

@@ -2,9 +2,11 @@ package com.adamthorpe.javacompiler.Compiler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariable;
 import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariableTable;
+import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStack;
+import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStackItem;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
@@ -17,6 +19,8 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 
 public class CodeGenerator {
@@ -25,18 +29,22 @@ public class CodeGenerator {
   protected ByteCode code;
 
   protected AttributesTable codeAttributes;
-  protected StackMapEntries stackMapEntries;
+
+  protected LocalVariableTable localVariables;
+  protected OperandStack operandStack;
 
   protected boolean hasReturn=false; //TEMP
-  protected LocalVariableTable localVariables;
   protected String className;
 
   public CodeGenerator(ConstantPool constantPool, String className) {
     this.constantPool = constantPool;
     this.codeAttributes = new AttributesTable(constantPool);
-    this.stackMapEntries = new StackMapEntries();
 
-    this.localVariables = new LocalVariableTable();
+    this.code = new ByteCode();
+
+    this.localVariables = new LocalVariableTable(code);
+    this.operandStack = new OperandStack();
+
     this.className = className;
   }
 
@@ -50,34 +58,98 @@ public class CodeGenerator {
   public AttributesTable run(BlockStmt block, List<Parameter> parameters) {
     AttributesTable attributes = new AttributesTable(constantPool);
 
-    code = new ByteCode(stackMapEntries);
-
     //Populate LocalVariableTable
-    localVariables.add(new LocalVariable("this", new EmptyType())); //TODO
     for (Parameter param : parameters) {
-      localVariables.add(new LocalVariable(param.getNameAsString(), new Type(param.getType())));
-      code.addMaxLocals(1);
+      localVariables.add(param.getNameAsString(), new Type(param.getType()), -1);
     }
 
-    //Evaluate each statement
-    for (Statement statement : block.getStatements()) {
-      if (statement.isExpressionStmt()) {
-        evaluateExpression(statement.asExpressionStmt().getExpression());
-
-      } else if (statement.isReturnStmt()) { //Evaluate the return statement
-        hasReturn=true;
-        statement.asReturnStmt().getExpression().ifPresentOrElse(
-          retExpr -> evaluateReturnStatement(retExpr), 
-          () -> code.addInstruction(OpCode.return_)
-        );
-      }
-    }
+    evaluateStatement(block);
 
     if (!hasReturn) code.addInstruction(OpCode.return_);
 
-    if(!stackMapEntries.instructionsIsEmpty()) codeAttributes.addStackMapTableAttribute(stackMapEntries);
+    StackMapEntries stackMapEntries = new StackMapEntries(code, localVariables, operandStack);
+    stackMapEntries.generateEntries();
+    if(!stackMapEntries.isEmpty()) codeAttributes.addStackMapTableAttribute(stackMapEntries);
+
     attributes.addCodeAttribute(code, codeAttributes);
     return attributes;
+  }
+
+  /**
+   * 
+   * 
+   * @param statement
+   */
+  protected void evaluateStatement(Statement statement) {
+    if (statement.isBlockStmt()) {
+      evaluateStatement(statement.asBlockStmt());
+
+    } else if (statement.isExpressionStmt()) {
+      evaluateExpression(statement.asExpressionStmt().getExpression());
+
+    } else if (statement.isIfStmt()) {
+      evaluateStatement(statement.asIfStmt());
+
+    } else if (statement.isReturnStmt()) {
+      evaluateStatement(statement.asReturnStmt());
+
+    } else {
+      System.err.println("Unsupported statement: " + statement.toString());
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param statement
+   */
+  protected void evaluateStatement(BlockStmt statement) {
+    for (Statement s : statement.getStatements()) {
+      evaluateStatement(s);
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param statement
+   */
+  protected void evaluateStatement(IfStmt statement) {
+    evaluateExpression(statement.getCondition());
+
+    Instruction noop = new Instruction(OpCode.nop, -1);
+    code.addJumpInstruction(OpCode.ifeq, noop);
+
+    evaluateStatement(statement.getThenStmt());
+
+    if(statement.hasElseBlock()) {
+      evaluateStatement(statement.getElseStmt().get());
+    }
+
+    code.addInstruction(noop);
+  }
+
+  /**
+   * <p>Evaluates a return statement
+   * Eg. <code>return var1;</code> or <code>return 2+3;</code>.</p>
+   * 
+   * @param expression  Input return expression
+   */
+  protected void evaluateStatement(ReturnStmt statement) {
+    hasReturn=true;
+    Optional<Expression> expression = statement.getExpression();
+
+    if (expression.isEmpty()) {
+      code.addInstruction(OpCode.return_);
+    } else {
+      Type returnType = evaluateExpression(expression.get());
+
+      if (returnType.isInt() || returnType.isBool()) {
+        code.addInstruction(OpCode.ireturn);
+      } else if (returnType.getName().equals("java/lang/String")) {
+        code.addInstruction(OpCode.areturn);
+      }
+    }
   }
 
   /**
@@ -135,7 +207,7 @@ public class CodeGenerator {
 
       Instruction jumpToFalse = new Instruction(OpCode.iconst_0, -1);
       Instruction jumpToTrue = new Instruction(OpCode.iconst_1, -1);
-      Type left = evaluateExpression(expression.getLeft());
+      evaluateExpression(expression.getLeft());
 
       if (op==Operator.AND) {
         code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
@@ -143,9 +215,11 @@ public class CodeGenerator {
         code.addJumpInstruction(OpCode.ifne, jumpToTrue);
       }
 
-      Type right = evaluateExpression(expression.getRight());
+      evaluateExpression(expression.getRight());
       code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
       code.addInstruction(jumpToTrue);
+
+      operandStack.add(new OperandStackItem(new Type("Z", true), code.getCurrentIndex()));
 
       code.addJumpInstruction(OpCode.goto_, jumpToFalse, jumpToFalse.getOpCode().getLen());
       code.addInstruction(jumpToFalse);
@@ -153,8 +227,9 @@ public class CodeGenerator {
       return new Type("Z", true); //Return boolean type
     
     } else if (op==Operator.PLUS) { //TODO
-      Type left = evaluateExpression(expression.getLeft());
-      Type right = evaluateExpression(expression.getRight());
+      evaluateExpression(expression.getLeft());
+      operandStack.add(new OperandStackItem(new Type("I", true), code.getCurrentIndex()));
+      evaluateExpression(expression.getRight());
 
       code.addInstruction(OpCode.iadd);
       code.addMaxStack(1);
@@ -341,10 +416,7 @@ public class CodeGenerator {
       expressionType = new Type(variableDeclaration.getType());
 
       // Add new variable to local variables table
-      localVariables.add(
-        new LocalVariable(variableDeclaration.getName().asString(), expressionType)
-      );
-      code.addMaxLocals(1);
+      localVariables.add(variableDeclaration.getNameAsString(), expressionType, code.getCurrentIndex());
 
       int index = localVariables.size()-1;
       if(expressionType.isInt() || expressionType.isBool()) {
@@ -361,21 +433,5 @@ public class CodeGenerator {
     }
 
     return expressionType;
-  }
-
-  /**
-   * <p>Evaluates the expression in a return statement
-   * Eg. <code>return var1;</code> or <code>return 2+3;</code>.</p>
-   * 
-   * @param expression  Input return expression
-   */
-  protected void evaluateReturnStatement(Expression expression) {
-    Type returnType = evaluateExpression(expression);
-
-    if (returnType.isInt() || returnType.isBool()) {
-      code.addInstruction(OpCode.ireturn);
-    } else if (returnType.getName().equals("java/lang/String")) {
-      code.addInstruction(OpCode.areturn);
-    }
   }
 }

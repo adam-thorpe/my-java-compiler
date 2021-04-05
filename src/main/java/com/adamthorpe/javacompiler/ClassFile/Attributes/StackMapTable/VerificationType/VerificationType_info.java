@@ -1,6 +1,7 @@
 package com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.VerificationType;
 
 import com.adamthorpe.javacompiler.ClassFile.ByteData;
+import com.adamthorpe.javacompiler.Compiler.Type;
 import com.adamthorpe.javacompiler.Utilities.ByteConvert;
 
 /**
@@ -10,10 +11,15 @@ import com.adamthorpe.javacompiler.Utilities.ByteConvert;
  */
 public class VerificationType_info implements ByteData {
   
+  protected VerificationType_tag verificationType_tag;
   protected byte[] tag; //u1
 
-  public VerificationType_info(VerificationType_tag tag) {
-    this.tag = ByteConvert.intToBytes(1, tag.getTag());
+  public VerificationType_info(Type type) {
+    if(type.isInt() || type.isBool()) {
+     this.verificationType_tag=VerificationType_tag.ITEM_Integer;
+    }
+
+    this.tag = ByteConvert.intToBytes(1, verificationType_tag.getTag());
   }
 
   @Override

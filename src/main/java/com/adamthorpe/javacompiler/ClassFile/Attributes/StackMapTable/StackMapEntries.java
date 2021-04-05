@@ -4,82 +4,63 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.ClassFile.DataTable;
-import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.VerificationType.VerificationType_info;
-import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.VerificationType.VerificationType_tag;
+import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
+import com.adamthorpe.javacompiler.ClassFile.Code.Instruction;
 import com.adamthorpe.javacompiler.ClassFile.Code.JumpInstruction;
-import com.adamthorpe.javacompiler.ClassFile.Code.OpCode;
-import com.adamthorpe.javacompiler.Utilities.ByteConvert;
+import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariable;
+import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariableTable;
+import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStack;
+import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStackItem;
 
 public class StackMapEntries extends DataTable<StackMapFrame> {
 
   protected static final long serialVersionUID = 1L;
-  protected List<JumpInstruction> instructions;
-  protected int previous;
+  protected ByteCode code;
+  protected LocalVariableTable localVariableTable;
+  protected OperandStack operandStack;
 
-  public StackMapEntries() {
-    instructions = new ArrayList<>();
-    previous=0;
+  public StackMapEntries(ByteCode code, LocalVariableTable localVariableTable, OperandStack operandStack) {
+    this.code=code;
+    this.localVariableTable=localVariableTable;
+    this.operandStack=operandStack;
   }
 
-  /**
-   * <p>Insert a new instruction into the list of instructions.</p>
-   * 
-   * @param i The instruction
-   */
-  public void insertInstruction(JumpInstruction i) {
-    instructions.add(i);
-  }
+  public void generateEntries() {
+    for (Instruction instruction : code) {
 
-  /**
-   * <p>Generates the StackMapTable entries.</p>
-   */
-  protected void generateEntries() {
-    for(JumpInstruction instruction : instructions) {
+      if (instruction.isJumpInstruction()) {
+        JumpInstruction jumpInstruction=instruction.toJumpInstruction();
+        int index = jumpInstruction.getIndex();
 
-      if(instruction.getOpCode()==OpCode.goto_) {
-        List<VerificationType_info> stack = new ArrayList<>();
-        stack.add(new VerificationType_info(VerificationType_tag.ITEM_Integer));
-        add(new StackMapFrame(64, stack));
-      } else {
-        int jumpIndex = instruction.calculateJump()+instruction.getIndex();
+        //Calculate current stack items and offset
+        List<LocalVariable> currentLocals = localVariableTable.getCurrentLocals(index);
+        List<OperandStackItem> currentOperands = operandStack.getCurrentLocals(index);
 
-        if (previous==0) {
-          add(new StackMapFrame(jumpIndex));
-
-        } else if (previous==jumpIndex) {
-          //Do nothing
-        } else if (previous<jumpIndex) {
-          add(new StackMapFrame(jumpIndex-previous-1));
-        }
-        previous=jumpIndex;
+        int offset = index + jumpInstruction.calculateJumpOffset();
+        
+        addFrame(offset, currentLocals, currentOperands);
       }
     }
   }
 
-  /**
-   * <p>Checks whether there are any instructions stored in the StackMap.</p>
-   * 
-   * @return <code>True</code> if there are no entries
-   */
-  public boolean instructionsIsEmpty() {
-    return instructions.isEmpty();
-  }
+  private void addFrame(int offset, List<LocalVariable> currentLocals, List<OperandStackItem> currentOperands) {
 
-  @Override
-  public int size() {
-    if (isEmpty()) generateEntries();
-    return super.size();
-  }
+    if (isEmpty()) {
+      add(new StackMapFrame(offset, offset, currentLocals, currentOperands));
+    } else {
+      StackMapFrame previousFrame = get(size()-1);
 
-  @Override
-  public byte[] getData() {
-    if (isEmpty()) generateEntries();
-    return ByteConvert.toByteArr(this);
-  }
+      int previousOffset = previousFrame.getOffset();
+      List<LocalVariable> previousLocals = previousFrame.getLocals();
+      List<OperandStackItem> previousOperands = previousFrame.getOperands();
 
-  @Override
-  public int getLength() {
-    if (isEmpty()) generateEntries();
-    return super.getLength();
+      if(offset!=previousOffset) {
+        int varOffset=offset-previousOffset-1;
+        currentLocals.removeAll(previousLocals);
+        currentOperands.removeAll(previousOperands);
+
+        add(new StackMapFrame(offset, varOffset, currentLocals, currentOperands));
+      }
+    }
   }
 }
