@@ -11,15 +11,15 @@ import com.adamthorpe.javacompiler.Utilities.ByteConvert;
  */
 public class VerificationType_info implements ByteData {
   
-  protected VerificationType_tag verificationType_tag;
   protected byte[] tag; //u1
 
   public VerificationType_info(Type type) {
     if(type.isInt() || type.isBool()) {
-     this.verificationType_tag=VerificationType_tag.ITEM_Integer;
+     this.tag = ByteConvert.intToBytes(1, VerificationType_tag.ITEM_Integer.getTag());
+    } else {
+      System.err.println("Invalid VerificationType_info Created");
+      this.tag=new byte[0];
     }
-
-    this.tag = ByteConvert.intToBytes(1, verificationType_tag.getTag());
   }
 
   @Override

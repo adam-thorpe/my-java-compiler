@@ -1,6 +1,5 @@
 package com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.adamthorpe.javacompiler.ClassFile.DataTable;

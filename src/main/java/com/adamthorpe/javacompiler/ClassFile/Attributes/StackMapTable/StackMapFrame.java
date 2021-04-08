@@ -32,7 +32,7 @@ public class StackMapFrame implements ByteData {
     if (localVariables.isEmpty()) {
       if (operandStack.isEmpty()) {
         //SAME
-        if (varOffset<64) { 
+        if (varOffset<64) {
           this.frame_type=ByteConvert.intToBytes(1, varOffset);
           this.offset_delta=new byte[0];
     
@@ -57,7 +57,13 @@ public class StackMapFrame implements ByteData {
         }
 
         this.stack = new VerificationType_info(operandStack.get(0).getType()).getData();
+      } else {
+        System.err.println("Invalid StackMapFrame Created");
+        this.frame_type=new byte[0];
+        this.offset_delta=new byte[0];
+        this.stack=new byte[0];
       }
+
 
     //APPEND
     } else if (localVariables.size()<=3) {
@@ -70,6 +76,11 @@ public class StackMapFrame implements ByteData {
       }
 
       this.stack=ByteConvert.toByteArr(stack);
+    } else {
+      System.err.println("Invalid StackMapFrame Created");
+      this.frame_type=new byte[0];
+      this.offset_delta=new byte[0];
+      this.stack=new byte[0];
     }
   }
 

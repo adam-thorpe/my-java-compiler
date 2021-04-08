@@ -37,7 +37,7 @@ public class IfThenElseTest extends TestCase implements TestCaseInterface {
 
   @Test
   public void testMethods() {
-    assertEquals(1, thisClass.getDeclaredMethods().length);
+    assertEquals(3, thisClass.getDeclaredMethods().length);
   }
 
   @Test

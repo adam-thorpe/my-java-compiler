@@ -57,6 +57,21 @@ public class ByteCode extends DataTable<Instruction> {
    * <p>Add a jump instruction to the list of bytecode instructions. This instruction is special, 
    * beacause it will contain a link to another instruction of which it points to.</p>
    * 
+   * @param op  OpCode of the instruction
+   * @return    The dummy pointer instruction
+   */
+  public Instruction addJumpInstruction(OpCode op) {
+    Instruction dummy = new Instruction(OpCode.nop, -1);
+    this.add(new JumpInstruction(op, currentIndex, dummy));
+    currentIndex+=op.getLen();
+
+    return dummy;
+  }
+
+  /**
+   * <p>Add a jump instruction to the list of bytecode instructions. This instruction is special, 
+   * beacause it will contain a link to another instruction of which it points to.</p>
+   * 
    * @param op      OpCode of the instruction
    * @param jumpTo  Instruction to jump to
    */
@@ -83,8 +98,8 @@ public class ByteCode extends DataTable<Instruction> {
    * 
    * @param increment Increment to be added to <code>max_stack</code>
    */
-  public void addMaxStack(int increment) {
-    max_stack+=increment;
+  public void addMaxStack() {
+    max_stack+=1;
   }
 
   /**
@@ -101,8 +116,8 @@ public class ByteCode extends DataTable<Instruction> {
    * 
    * @param increment Increment to be added to <code>max_locals</code>
    */
-  public void addMaxLocals(int increment) {
-    max_locals+=increment;
+  public void addMaxLocals() {
+    max_locals+=1;
   }
 
   /**

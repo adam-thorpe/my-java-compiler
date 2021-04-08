@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import com.adamthorpe.javacompiler.ClassFile.LocalVariables.LocalVariableTable;
 import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStack;
-import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStackItem;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
@@ -43,7 +42,7 @@ public class CodeGenerator {
     this.code = new ByteCode();
 
     this.localVariables = new LocalVariableTable(code);
-    this.operandStack = new OperandStack();
+    this.operandStack = new OperandStack(code);
 
     this.className = className;
   }
@@ -115,18 +114,25 @@ public class CodeGenerator {
    * @param statement
    */
   protected void evaluateStatement(IfStmt statement) {
-    evaluateExpression(statement.getCondition());
+    EvaluatedData data = evaluateExpression(statement.getCondition());
 
-    Instruction noop = new Instruction(OpCode.nop, -1);
-    code.addJumpInstruction(OpCode.ifeq, noop);
+    Instruction dummy;
+    if (data.hasInstruction()) {
+      dummy=data.getInstruction();
+    } else {
+      dummy=code.addJumpInstruction(OpCode.ifeq);
+    }
 
     evaluateStatement(statement.getThenStmt());
+    dummy.setIndex(code.getCurrentIndex());
 
     if(statement.hasElseBlock()) {
       evaluateStatement(statement.getElseStmt().get());
+
+    } else if (statement.hasElseBranch()) {
+      evaluateStatement(statement.getElseStmt().get());
     }
 
-    code.addInstruction(noop);
   }
 
   /**
@@ -142,7 +148,7 @@ public class CodeGenerator {
     if (expression.isEmpty()) {
       code.addInstruction(OpCode.return_);
     } else {
-      Type returnType = evaluateExpression(expression.get());
+      Type returnType = evaluateExpression(expression.get()).getType();
 
       if (returnType.isInt() || returnType.isBool()) {
         code.addInstruction(OpCode.ireturn);
@@ -159,7 +165,7 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(Expression expression) {
+  protected EvaluatedData evaluateExpression(Expression expression) {
     if (expression.isBinaryExpr()) {
       return evaluateExpression(expression.asBinaryExpr());
 
@@ -186,7 +192,7 @@ public class CodeGenerator {
 
     } else {
       System.err.println("Unsupported expression: " + expression.toString());
-      return new EmptyType();
+      return new EvaluatedData(new EmptyType());
     }
   }
 
@@ -198,12 +204,13 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(BinaryExpr expression) {
+  protected EvaluatedData evaluateExpression(BinaryExpr expression) {
 
     Operator op = expression.getOperator();
 
-    //Evaluate the operator
+    // BOOLEAN STATEMENTS
     if (op==Operator.AND || op==Operator.OR) {
+      Type operandType=new Type("Z", true);
 
       Instruction jumpToFalse = new Instruction(OpCode.iconst_0, -1);
       Instruction jumpToTrue = new Instruction(OpCode.iconst_1, -1);
@@ -219,25 +226,61 @@ public class CodeGenerator {
       code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
       code.addInstruction(jumpToTrue);
 
-      operandStack.add(new OperandStackItem(new Type("Z", true), code.getCurrentIndex()));
+      operandStack.addStackItem(operandType, code.getCurrentIndex());
 
       code.addJumpInstruction(OpCode.goto_, jumpToFalse, jumpToFalse.getOpCode().getLen());
       code.addInstruction(jumpToFalse);
 
-      return new Type("Z", true); //Return boolean type
+      return new EvaluatedData(operandType);
     
-    } else if (op==Operator.PLUS) { //TODO
+    // MATH STATEMENTS
+    } else if (op==Operator.PLUS) {
+      Type operandType=new Type("I", true);
+
       evaluateExpression(expression.getLeft());
-      operandStack.add(new OperandStackItem(new Type("I", true), code.getCurrentIndex()));
       evaluateExpression(expression.getRight());
 
       code.addInstruction(OpCode.iadd);
-      code.addMaxStack(1);
+      
+      //operandStack.addStackItem(operandType, code.getCurrentIndex());
+      return new EvaluatedData(operandType, null, null);
 
-      return new Type("I", true); //Return integer type
+    // COMPARE STATEMENTS
+    } else if (op==Operator.GREATER || 
+        op==Operator.GREATER_EQUALS || 
+        op==Operator.LESS || 
+        op==Operator.LESS_EQUALS || 
+        op==Operator.EQUALS ||
+        op==Operator.NOT_EQUALS) {
+
+      Type left=evaluateExpression(expression.getLeft()).getType();
+      Type right=evaluateExpression(expression.getRight()).getType();
+
+      if (left.isInt() && right.isInt()) {
+        Instruction dummy;
+        Type operandType = new Type("I", true);
+        
+        if(op==Operator.GREATER) {
+          dummy = code.addJumpInstruction(OpCode.if_icmple);
+        } else if (op==Operator.GREATER_EQUALS) {
+          dummy = code.addJumpInstruction(OpCode.if_icmplt);
+        } else if (op==Operator.LESS) {
+          dummy = code.addJumpInstruction(OpCode.if_icmpge);
+        } else if (op==Operator.LESS_EQUALS) {
+          dummy = code.addJumpInstruction(OpCode.if_icmpgt);
+        } else if (op==Operator.EQUALS) {
+          dummy = code.addJumpInstruction(OpCode.if_icmpne);
+        } else {
+          dummy = code.addJumpInstruction(OpCode.if_icmpeq);
+        }
+
+        //operandStack.addStackItem(operandType, code.getCurrentIndex());
+        return new EvaluatedData(operandType, dummy);
+      }
+
     }
-
-    return new EmptyType(); //TODO
+    
+    return new EvaluatedData(new EmptyType()); //TODO
   }
 
   /**
@@ -247,7 +290,7 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(BooleanLiteralExpr expression) {
+  protected EvaluatedData evaluateExpression(BooleanLiteralExpr expression) {
     boolean value = expression.getValue();
 
     if(value) {
@@ -256,7 +299,7 @@ public class CodeGenerator {
       code.addInstruction(OpCode.iconst_0);
     }
 
-    return new Type("Z", true);
+    return new EvaluatedData(new Type("Z", true), value);
   }
 
   /**
@@ -266,9 +309,9 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(FieldAccessExpr expression) {
+  protected EvaluatedData evaluateExpression(FieldAccessExpr expression) {
     // Get scope
-    Type scope = evaluateExpression(expression.getScope());
+    Type scope = evaluateExpression(expression.getScope()).getType();
 
     // Get type
     Type fieldType = new Type(expression.resolve().getType());
@@ -281,7 +324,7 @@ public class CodeGenerator {
       )
     );
 
-    return fieldType;
+    return new EvaluatedData(fieldType, null, null);
   }
 
   /**
@@ -291,7 +334,7 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(IntegerLiteralExpr expression) {
+  protected EvaluatedData evaluateExpression(IntegerLiteralExpr expression) {
     int value = expression.asNumber().intValue(); //Evaluate integer value of the expression
 
     if (value==0) {
@@ -307,10 +350,12 @@ public class CodeGenerator {
     } else if (value==5) {
       code.addInstruction(OpCode.iconst_5);
     } else {
-      //TODO
+      code.addInstruction(OpCode.bipush, 1, value);
     }
 
-    return new Type("I", true);
+    code.addMaxStack();
+
+    return new EvaluatedData(new Type("I", true), value);
   }
 
   /**
@@ -320,11 +365,11 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(MethodCallExpr expression) {
+  protected EvaluatedData evaluateExpression(MethodCallExpr expression) {
     //Evaluate scope
     String scopeName;
     if(expression.getScope().isPresent()) {
-      scopeName=evaluateExpression(expression.getScope().get()).getName();
+      scopeName=evaluateExpression(expression.getScope().get()).getType().getName();
     } else {
       scopeName=className;
     }
@@ -332,7 +377,7 @@ public class CodeGenerator {
     //Evaluate arguments
     List<Type> argTypes = new ArrayList<>();
     expression.getArguments().forEach(arg -> 
-      argTypes.add(evaluateExpression(arg))
+      argTypes.add(evaluateExpression(arg).getType())
     );
 
     //Get method return type
@@ -346,7 +391,7 @@ public class CodeGenerator {
       )
     );
 
-    return returnType;
+    return new EvaluatedData(returnType);
   }
 
   /**
@@ -356,13 +401,13 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(NameExpr expression) {
+  protected EvaluatedData evaluateExpression(NameExpr expression) {
     //Get the type of the name expression
     Type exprType = new Type(expression.calculateResolvedType());
 
     //Search localVariableTable for variable name. Return type if it is not found
     int index = localVariables.find(expression.getNameAsString());
-    if (index==-1) return exprType;
+    if (index==-1) return new EvaluatedData(exprType, null, null);;
 
     if (exprType.isInt() || exprType.isBool()) {
       if (index==0) {
@@ -376,7 +421,7 @@ public class CodeGenerator {
       }
     }
 
-    return exprType;
+    return new EvaluatedData(exprType);
   }
   
   /**
@@ -386,13 +431,15 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(StringLiteralExpr expression) {
+  protected EvaluatedData evaluateExpression(StringLiteralExpr expression) {
+    Type exprType=new Type("java/lang/String", false);
+
     code.addInstruction(OpCode.ldc,
       1, constantPool.addString_info(expression.asString())
     );
-    code.addMaxStack(1);
+    code.addMaxStack();
 
-    return new Type("java/lang/String", false); //Return String Type
+    return new EvaluatedData(exprType, expression.asString());
   }
 
   /**
@@ -402,9 +449,9 @@ public class CodeGenerator {
    * @param expression  The input expression
    * @return            Expression Type
    */
-  protected Type evaluateExpression(VariableDeclarationExpr expression) {
+  protected EvaluatedData evaluateExpression(VariableDeclarationExpr expression) {
 
-    Type expressionType = new EmptyType();
+    Type exprType = new EmptyType();
 
     // Loop through variable declarations
     for (VariableDeclarator variableDeclaration : expression.getVariables()) {
@@ -413,13 +460,13 @@ public class CodeGenerator {
       variableDeclaration.getInitializer().ifPresent(body -> evaluateExpression(body));
 
       //Create type
-      expressionType = new Type(variableDeclaration.getType());
+      exprType = new Type(variableDeclaration.getType());
 
       // Add new variable to local variables table
-      localVariables.add(variableDeclaration.getNameAsString(), expressionType, code.getCurrentIndex());
+      localVariables.add(variableDeclaration.getNameAsString(), exprType, code.getCurrentIndex());
 
       int index = localVariables.size()-1;
-      if(expressionType.isInt() || expressionType.isBool()) {
+      if(exprType.isInt() || exprType.isBool()) {
         if (index==0) {
           code.addInstruction(OpCode.istore_0);
         } else if (index==1) {
@@ -432,6 +479,6 @@ public class CodeGenerator {
       }
     }
 
-    return expressionType;
+    return new EvaluatedData(exprType);
   }
 }

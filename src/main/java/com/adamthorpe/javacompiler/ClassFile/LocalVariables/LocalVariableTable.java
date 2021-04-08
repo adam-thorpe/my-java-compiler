@@ -20,7 +20,7 @@ public class LocalVariableTable extends ArrayList<LocalVariable> {
 
   public void add(String name, Type type, int index) {
     this.add(new LocalVariable(name, type, index));
-    code.addMaxLocals(1);
+    code.addMaxLocals();
   }
   
   /**
