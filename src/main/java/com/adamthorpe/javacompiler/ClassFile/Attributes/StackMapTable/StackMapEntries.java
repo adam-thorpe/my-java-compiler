@@ -53,6 +53,7 @@ public class StackMapEntries extends DataTable<StackMapFrame> {
       if (offset<previousOffset) {
         remove(previousFrame);
         addFrame(offset, currentLocals, currentOperands);
+        addFrame(previousFrame.getOffset(), previousFrame.getLocals(), previousFrame.getOperands());
 
       } else if(offset!=previousOffset) {
         add(new StackMapFrame(offset, currentLocals, currentOperands, previousFrame));

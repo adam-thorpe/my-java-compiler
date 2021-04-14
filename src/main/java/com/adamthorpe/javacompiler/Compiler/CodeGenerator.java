@@ -21,6 +21,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.WhileStmt;
 
 public class CodeGenerator {
 
@@ -91,6 +92,9 @@ public class CodeGenerator {
 
     } else if (statement.isReturnStmt()) {
       return evaluateStatement(statement.asReturnStmt());
+    
+    } else if (statement.isWhileStmt()) {
+      return evaluateStatement(statement.asWhileStmt());
 
     } else {
       System.err.println("Unsupported statement: " + statement.toString());
@@ -172,6 +176,29 @@ public class CodeGenerator {
   }
 
   /**
+   * 
+   * 
+   * @param statement
+   * @return
+   */
+  protected boolean evaluateStatement(WhileStmt statement) {
+    
+    int start = code.getCurrentIndex();
+
+    Instruction condition = evaluateExpression(statement.getCondition()).getInstruction();
+    boolean hasReturn = evaluateStatement(statement.getBody());
+
+    //Set jump instruction
+    Instruction i = code.addJumpInstruction(OpCode.goto_);
+    i.setIndex(start);
+
+
+    condition.setIndex(code.getCurrentIndex());
+
+    return hasReturn;
+  }
+
+  /**
    * <p>This method will determine the form of <code>expression</code> and then evaluate it further. This 
    * is a recursive function, as each expression often comprises of sub-expressions.</p>
    * 
@@ -179,7 +206,10 @@ public class CodeGenerator {
    * @return            Expression Type
    */
   protected EvaluatedData evaluateExpression(Expression expression) {
-    if (expression.isBinaryExpr()) {
+    if (expression.isAssignExpr()) {
+      return evaluateExpression(expression.asAssignExpr());
+
+    } else if (expression.isBinaryExpr()) {
       return evaluateExpression(expression.asBinaryExpr());
 
     } else if (expression.isBooleanLiteralExpr()) {
@@ -210,6 +240,31 @@ public class CodeGenerator {
       System.err.println("Unsupported expression: " + expression.toString());
       return new EvaluatedData(new EmptyType());
     }
+  }
+
+  /**
+   * 
+   * 
+   * @param expression
+   * @return
+   */
+  protected EvaluatedData evaluateExpression(AssignExpr expression) {
+    
+    String varName = (String) evaluateExpression(expression.getTarget()).getData();
+    evaluateExpression(expression.getValue());
+
+    int index = localVariables.find(varName);
+    if (index==0) {
+      code.addInstruction(OpCode.istore_0);
+    } else if (index==1) {
+      code.addInstruction(OpCode.istore_1);
+    } else if (index==2) {
+      code.addInstruction(OpCode.istore_2);
+    } else if (index==3) {
+      code.addInstruction(OpCode.istore_3);
+    }
+
+    return new EvaluatedData(new EmptyType());
   }
 
   /**
@@ -440,21 +495,32 @@ public class CodeGenerator {
     if (index!=-1) {
 
       if (exprType.isInt() || exprType.isBool()) {
+        OpCode op;
         if (index==0) {
-          code.addInstruction(OpCode.iload_0);
+          op=OpCode.iload_0;
         } else if (index==1) {
-          code.addInstruction(OpCode.iload_1);
+          op=OpCode.iload_1;
         } else if (index==2) {
-          code.addInstruction(OpCode.iload_2);
+          op=OpCode.iload_2;
         } else if (index==3) {
-          code.addInstruction(OpCode.iload_3);
+          op=OpCode.iload_3;
         } else {
-          //TODO
+          op=OpCode.nop; //TODO
         }
+
+        //Check previous entry
+        if(code.size()>0) {
+          if(code.get(code.size()-1).getOpCode()!=op) {
+            code.addInstruction(op);
+          }
+        } else {
+          code.addInstruction(op);
+        }
+
       }
     }
 
-    return new EvaluatedData(exprType);
+    return new EvaluatedData(exprType, expression.getNameAsString());
   }
   
   /**
