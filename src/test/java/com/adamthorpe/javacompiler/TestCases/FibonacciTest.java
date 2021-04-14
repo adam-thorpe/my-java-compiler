@@ -3,6 +3,8 @@ package com.adamthorpe.javacompiler.TestCases;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -13,12 +15,15 @@ import com.adamthorpe.javacompiler.TestCaseInterface;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TwoMethodsTest extends TestCase implements TestCaseInterface {
+/**
+ * Test bin/Fibonacci/Fibonacci.java
+ */
+public class FibonacciTest extends TestCase implements TestCaseInterface {
 
-  private static final String className="TwoMethods";
+  private static final String className="Fibonacci";
   private static final String directory="bin/"+className+"/";
 
-  public TwoMethodsTest() {
+  public FibonacciTest() {
     super(directory, className);
   }
 
@@ -40,22 +45,21 @@ public class TwoMethodsTest extends TestCase implements TestCaseInterface {
 
   @Test
   public void testMethods() {
-    assertEquals(2, thisClass.getDeclaredMethods().length);    
+    assertEquals(1, thisClass.getDeclaredMethods().length);
   }
 
   @Test
-  public void testMethodA() throws Exception {
-    Method method = thisClass.getMethod("A", int.class);
-    testMethod(method, Modifier.PUBLIC, int.class);
-    testMethodBody(method, new Object[]{5}, 5);
-    testMethodBody(method, new Object[]{100}, 100);
-    testMethodBody(method, new Object[]{-1}, -1);
-  }
+  public void testMethodMain() throws Exception {
+    Method method = thisClass.getMethod("main", String[].class);
+    testMethod(method, Modifier.PUBLIC+Modifier.STATIC, void.class);
 
-  @Test
-  public void testMethodB() throws Exception {
-    Method method = thisClass.getMethod("B");
-    testMethod(method, Modifier.PUBLIC, String.class);
-    testMethodBody(method, null, "Hello");
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(outStream));
+
+    Object[] args = new Object[1];
+    args[0] = new String[]{};
+    method.invoke(null, args);
+    
+    assertEquals("1\n1\n2\n3\n5\n8\n13\n21\n34\n55", outStream.toString().trim());
   }
 }

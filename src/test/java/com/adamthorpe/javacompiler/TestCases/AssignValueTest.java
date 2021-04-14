@@ -15,18 +15,21 @@ import org.junit.Test;
 
 public class AssignValueTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="AssignValue";
+  private static final String directory="bin/"+className+"/";
+
   public AssignValueTest() {
-    super("bin/AssignValue", "AssignValue");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/AssignValue/AssignValue.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("AssignValue", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test

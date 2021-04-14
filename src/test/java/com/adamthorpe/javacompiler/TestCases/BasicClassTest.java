@@ -18,18 +18,21 @@ import org.junit.Test;
  */
 public class BasicClassTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="BasicClass";
+  private static final String directory="bin/"+className+"/";
+
   public BasicClassTest() {
-    super("bin/BasicClass", "BasicClass");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/BasicClass/BasicClass.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("BasicClass", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test

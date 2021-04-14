@@ -250,10 +250,9 @@ public class CodeGenerator {
    */
   protected EvaluatedData evaluateExpression(AssignExpr expression) {
     
-    String varName = (String) evaluateExpression(expression.getTarget()).getData();
     evaluateExpression(expression.getValue());
 
-    int index = localVariables.find(varName);
+    int index = localVariables.find(expression.getTarget().toString());
     if (index==0) {
       code.addInstruction(OpCode.istore_0);
     } else if (index==1) {
@@ -305,13 +304,17 @@ public class CodeGenerator {
       return new EvaluatedData(operandType);
     
     // MATH STATEMENTS
-    } else if (op==Operator.PLUS) {
+    } else if (op==Operator.PLUS || op==Operator.MINUS) {
       Type operandType=new Type("I", true);
 
       evaluateExpression(expression.getLeft());
       evaluateExpression(expression.getRight());
 
-      code.addInstruction(OpCode.iadd);
+      if (op==Operator.PLUS) {
+        code.addInstruction(OpCode.iadd);
+      } else if (op==Operator.MINUS) {
+        code.addInstruction(OpCode.isub);
+      }
       
       //operandStack.addStackItem(operandType, code.getCurrentIndex());
       return new EvaluatedData(operandType);
@@ -507,16 +510,7 @@ public class CodeGenerator {
         } else {
           op=OpCode.nop; //TODO
         }
-
-        //Check previous entry
-        if(code.size()>0) {
-          if(code.get(code.size()-1).getOpCode()!=op) {
-            code.addInstruction(op);
-          }
-        } else {
-          code.addInstruction(op);
-        }
-
+        code.addInstruction(op);
       }
     }
 

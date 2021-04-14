@@ -15,18 +15,21 @@ import org.junit.Test;
 
 public class IfThenElseTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="IfThenElse";
+  private static final String directory="bin/"+className+"/";
+
   public IfThenElseTest() {
-    super("bin/IfThenElse", "IfThenElse");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/IfThenElse/IfThenElse.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("IfThenElse", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test

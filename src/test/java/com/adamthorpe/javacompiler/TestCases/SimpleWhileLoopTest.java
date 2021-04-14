@@ -20,18 +20,21 @@ import org.junit.Test;
  */
 public class SimpleWhileLoopTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="SimpleWhileLoop";
+  private static final String directory="bin/"+className+"/";
+
   public SimpleWhileLoopTest() {
-    super("bin/SimpleWhileLoop", "SimpleWhileLoop");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/SimpleWhileLoop/SimpleWhileLoop.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("SimpleWhileLoop", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test

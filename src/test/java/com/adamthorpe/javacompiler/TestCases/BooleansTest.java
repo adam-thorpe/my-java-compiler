@@ -15,18 +15,21 @@ import org.junit.Test;
 
 public class BooleansTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="Booleans";
+  private static final String directory="bin/"+className+"/";
+
   public BooleansTest() {
-    super("bin/Booleans", "Booleans");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/Booleans/Booleans.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("Booleans", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test

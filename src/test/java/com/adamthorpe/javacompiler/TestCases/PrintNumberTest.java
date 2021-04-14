@@ -20,18 +20,21 @@ import org.junit.Test;
  */
 public class PrintNumberTest extends TestCase implements TestCaseInterface {
 
+  private static final String className="PrintNumber";
+  private static final String directory="bin/"+className+"/";
+
   public PrintNumberTest() {
-    super("bin/PrintNumber", "PrintNumber");
+    super(directory, className);
   }
 
   @BeforeClass
   public static void compileClass() {
-    assertDoesNotThrow(() -> App.main(new String[] { "bin/PrintNumber/PrintNumber.java" }));
+    assertDoesNotThrow(() -> App.main(new String[] { directory+className+".java" }));
   }
 
   @Test
   public void testGeneralInfo() {
-    testGeneralInfo("PrintNumber", Object.class, Modifier.PUBLIC);
+    testGeneralInfo(className, Object.class, Modifier.PUBLIC);
   }
 
   @Test
