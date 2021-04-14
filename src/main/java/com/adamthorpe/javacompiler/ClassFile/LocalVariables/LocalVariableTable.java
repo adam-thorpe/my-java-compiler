@@ -12,10 +12,12 @@ public class LocalVariableTable extends ArrayList<LocalVariable> {
   private static final long serialVersionUID = 1L;
   protected ByteCode code;
 
-  public LocalVariableTable(ByteCode code) {
+  public LocalVariableTable(ByteCode code, boolean isStaticMethod) {
     super();
     this.code=code;
-    this.add(new LocalVariable("this", new EmptyType(), -1));
+    if (!isStaticMethod) {
+      this.add(new LocalVariable("this", new EmptyType(), -1)); //TODO
+    } 
   }
 
   public void add(String name, Type type, int index) {

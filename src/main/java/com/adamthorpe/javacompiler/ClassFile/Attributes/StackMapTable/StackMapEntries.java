@@ -34,7 +34,6 @@ public class StackMapEntries extends DataTable<StackMapFrame> {
         //Calculate current stack items and offset
         List<LocalVariable> currentLocals = localVariableTable.getCurrentLocals(index);
         List<OperandStackItem> currentOperands = operandStack.getCurrentLocals(index);
-
         int offset = index + jumpInstruction.calculateJumpOffset();
         
         addFrame(offset, currentLocals, currentOperands);
@@ -45,21 +44,19 @@ public class StackMapEntries extends DataTable<StackMapFrame> {
   private void addFrame(int offset, List<LocalVariable> currentLocals, List<OperandStackItem> currentOperands) {
 
     if (isEmpty()) {
-      add(new StackMapFrame(offset, offset, currentLocals, currentOperands));
+      add(new StackMapFrame(offset, currentLocals, currentOperands));
+      
     } else {
       StackMapFrame previousFrame = get(size()-1);
-
       int previousOffset = previousFrame.getOffset();
-      List<LocalVariable> previousLocals = previousFrame.getLocals();
-      List<OperandStackItem> previousOperands = previousFrame.getOperands();
 
-      if(offset!=previousOffset) {
-        int varOffset=offset-previousOffset-1;
-        currentLocals.removeAll(previousLocals);
-        currentOperands.removeAll(previousOperands);
+      if (offset<previousOffset) {
+        remove(previousFrame);
+        addFrame(offset, currentLocals, currentOperands);
 
-        add(new StackMapFrame(offset, varOffset, currentLocals, currentOperands));
-      }
+      } else if(offset!=previousOffset) {
+        add(new StackMapFrame(offset, currentLocals, currentOperands, previousFrame));
+      } 
     }
   }
 }

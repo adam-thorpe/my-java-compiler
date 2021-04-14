@@ -103,13 +103,17 @@ public class CompilerCore {
   protected void createMethodInfo(List<MethodDeclaration> methodDeclarations) {
 
     createConstructor();
+    boolean isStatic=false;
 
     for (MethodDeclaration md : methodDeclarations) {
 
       int accessFlags=0;
       // Check access flags
       if(md.isPublic()) accessFlags+=Modifier.PUBLIC;
-      if(md.isStatic()) accessFlags+=Modifier.STATIC;
+      if(md.isStatic()) {
+        accessFlags+=Modifier.STATIC;
+        isStatic=true;
+      }
 
       // Get list of parameters
       List<Type> paramTypes = new ArrayList<>();
@@ -118,7 +122,7 @@ public class CompilerCore {
       }
 
       //Generate code in the code generator
-      AttributesTable attributes = new CodeGenerator(constantPool, className).run(md.getBody().get(), md.getParameters());
+      AttributesTable attributes = new CodeGenerator(constantPool, className, isStatic).run(md.getBody().get(), md.getParameters());
 
       //Add method to method table
       methodsTable.insert(md.getNameAsString(), accessFlags, Util.createTypeInfo(new Type(md.getType()), paramTypes), attributes);

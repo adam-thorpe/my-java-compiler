@@ -8,11 +8,12 @@ import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
 import com.adamthorpe.javacompiler.TestCase;
+import com.adamthorpe.javacompiler.TestCaseInterface;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BooleansTest extends TestCase {
+public class BooleansTest extends TestCase implements TestCaseInterface {
 
   public BooleansTest() {
     super("bin/Booleans", "Booleans");

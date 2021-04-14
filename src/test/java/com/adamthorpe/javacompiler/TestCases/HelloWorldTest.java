@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
 import com.adamthorpe.javacompiler.TestCase;
+import com.adamthorpe.javacompiler.TestCaseInterface;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,7 +18,7 @@ import org.junit.Test;
 /**
  * Test bin/HelloWorld/HelloWorld.java
  */
-public class HelloWorldTest extends TestCase {
+public class HelloWorldTest extends TestCase implements TestCaseInterface {
 
   public HelloWorldTest() {
     super("bin/HelloWorld", "HelloWorld");

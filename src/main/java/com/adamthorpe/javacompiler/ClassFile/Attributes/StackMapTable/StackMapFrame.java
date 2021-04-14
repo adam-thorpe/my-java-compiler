@@ -24,64 +24,94 @@ public class StackMapFrame implements ByteData {
   protected List<LocalVariable> localVariables;
   protected List<OperandStackItem> operandStack;
 
-  public StackMapFrame(int offset, int varOffset, List<LocalVariable> localVariables, List<OperandStackItem> operandStack) {
+  public StackMapFrame(int offset, List<LocalVariable> localVariables, List<OperandStackItem> operandStack, StackMapFrame previousFrame) {
     this.offset=offset;
     this.localVariables=localVariables;
     this.operandStack=operandStack;
 
-    if (localVariables.isEmpty()) {
-      if (operandStack.isEmpty()) {
+    int newOffset = offset-previousFrame.getOffset()-1;
+
+    List<LocalVariable> newLocals = new ArrayList<>(localVariables);
+    newLocals.removeAll(previousFrame.getLocals());
+
+    List<LocalVariable> chopLocals = new ArrayList<>(previousFrame.getLocals());
+    chopLocals.removeAll(localVariables);
+
+    List<OperandStackItem> newOperands = new ArrayList<>(operandStack);
+    newOperands.removeAll(previousFrame.getOperands());
+
+    generateData(newOffset, newLocals, chopLocals, newOperands);
+  }
+
+  public StackMapFrame(int offset, List<LocalVariable> localVariables, List<OperandStackItem> operandStack) {
+    this.offset=offset;
+    this.localVariables=localVariables;
+    this.operandStack=operandStack;
+
+    generateData(offset, localVariables, new ArrayList<>(), operandStack);
+  }
+
+  public void generateData(int offsetDiff, List<LocalVariable> newLocals, List<LocalVariable> chopLocals, List<OperandStackItem> newOperands) {
+
+    if (newLocals.isEmpty() && chopLocals.isEmpty()) {
+      if (newOperands.isEmpty()) {
         //SAME
-        if (varOffset<64) {
-          this.frame_type=ByteConvert.intToBytes(1, varOffset);
+        if (offsetDiff<64) {
+          this.frame_type=ByteConvert.intToBytes(1, offsetDiff);
           this.offset_delta=new byte[0];
     
         //SAME_FRAME_EXTENDED
         } else {
           this.frame_type=ByteConvert.intToBytes(1, 251);
-          this.offset_delta=ByteConvert.intToBytes(2, varOffset);
+          this.offset_delta=ByteConvert.intToBytes(2, offsetDiff);
         }
 
         this.stack=new byte[0];
+        return;
 
-      } else if(operandStack.size()==1) {
+      } else if(newOperands.size()==1) {
         //SAME_LOCALS_1_STACK_ITEM
-        if (varOffset<64) {
-          this.frame_type=ByteConvert.intToBytes(1, varOffset+64);
+        if (offsetDiff<64) {
+          this.frame_type=ByteConvert.intToBytes(1, offsetDiff+64);
           this.offset_delta=new byte[0];
 
         //SAME_LOCALS_1_STACK_ITEM_EXTENDED
         } else { 
           this.frame_type=ByteConvert.intToBytes(1, 247);
-          this.offset_delta=ByteConvert.intToBytes(2, varOffset);
+          this.offset_delta=ByteConvert.intToBytes(2, offsetDiff);
         }
 
-        this.stack = new VerificationType_info(operandStack.get(0).getType()).getData();
-      } else {
-        System.err.println("Invalid StackMapFrame Created");
-        this.frame_type=new byte[0];
-        this.offset_delta=new byte[0];
-        this.stack=new byte[0];
+        this.stack = new VerificationType_info(newOperands.get(0).getType()).getData();
+        return;
       }
 
-
     //APPEND
-    } else if (localVariables.size()<=3) {
-      this.frame_type=ByteConvert.intToBytes(1, 251+localVariables.size());
-      this.offset_delta=ByteConvert.intToBytes(2, varOffset);
+    } else if (newLocals.size()<=3 && chopLocals.isEmpty()) {
+      this.frame_type=ByteConvert.intToBytes(1, 251+newLocals.size());
+      this.offset_delta=ByteConvert.intToBytes(2, offsetDiff);
       
       List<VerificationType_info> stack = new ArrayList<>();
-      for(LocalVariable localVariable : localVariables) {
-        stack.add(new VerificationType_info(localVariable.getType()));
+      for(LocalVariable local : newLocals) {
+        stack.add(new VerificationType_info(local.getType()));
       }
 
       this.stack=ByteConvert.toByteArr(stack);
+      return;
+
+    //CHOP
+    } else if (chopLocals.size()<=3 && newLocals.isEmpty()) {
+      System.err.println("CHOP FRAME");
+
+      chopLocals.forEach(l -> System.out.println(l.getName()));
+    //FULL
     } else {
-      System.err.println("Invalid StackMapFrame Created");
-      this.frame_type=new byte[0];
-      this.offset_delta=new byte[0];
-      this.stack=new byte[0];
+      System.err.println("FULL FRAME");
     }
+
+    System.err.println("Invalid StackMapFrame Created");
+    this.frame_type=new byte[0];
+    this.offset_delta=new byte[0];
+    this.stack=new byte[0];
   }
 
   public int getOffset() {

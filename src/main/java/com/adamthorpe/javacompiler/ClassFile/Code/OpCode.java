@@ -48,7 +48,8 @@ public enum OpCode {
   return_ (177, 1),
   getstatic (178, 3),
   invokevirtual (182, 3),
-  invokespecial(183, 3);
+  invokespecial(183, 3),
+  invokestatic(184, 3);
 
   private final int opCode;
   private final int len;

@@ -8,11 +8,12 @@ import java.lang.reflect.Modifier;
 
 import com.adamthorpe.javacompiler.App;
 import com.adamthorpe.javacompiler.TestCase;
+import com.adamthorpe.javacompiler.TestCaseInterface;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class AssignValueTest extends TestCase {
+public class AssignValueTest extends TestCase implements TestCaseInterface {
 
   public AssignValueTest() {
     super("bin/AssignValue", "AssignValue");

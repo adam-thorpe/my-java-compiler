@@ -32,16 +32,15 @@ public class CodeGenerator {
   protected LocalVariableTable localVariables;
   protected OperandStack operandStack;
 
-  protected boolean hasReturn=false; //TEMP
   protected String className;
 
-  public CodeGenerator(ConstantPool constantPool, String className) {
+  public CodeGenerator(ConstantPool constantPool, String className, boolean isStaticMethod) {
     this.constantPool = constantPool;
     this.codeAttributes = new AttributesTable(constantPool);
 
     this.code = new ByteCode();
 
-    this.localVariables = new LocalVariableTable(code);
+    this.localVariables = new LocalVariableTable(code, isStaticMethod);
     this.operandStack = new OperandStack(code);
 
     this.className = className;
@@ -62,7 +61,7 @@ public class CodeGenerator {
       localVariables.add(param.getNameAsString(), new Type(param.getType()), -1);
     }
 
-    evaluateStatement(block);
+    boolean hasReturn = evaluateStatement(block);
 
     if (!hasReturn) code.addInstruction(OpCode.return_);
 
@@ -79,21 +78,23 @@ public class CodeGenerator {
    * 
    * @param statement
    */
-  protected void evaluateStatement(Statement statement) {
+  protected boolean evaluateStatement(Statement statement) {
     if (statement.isBlockStmt()) {
-      evaluateStatement(statement.asBlockStmt());
+      return evaluateStatement(statement.asBlockStmt());
 
     } else if (statement.isExpressionStmt()) {
       evaluateExpression(statement.asExpressionStmt().getExpression());
+      return false;
 
     } else if (statement.isIfStmt()) {
-      evaluateStatement(statement.asIfStmt());
+      return evaluateStatement(statement.asIfStmt());
 
     } else if (statement.isReturnStmt()) {
-      evaluateStatement(statement.asReturnStmt());
+      return evaluateStatement(statement.asReturnStmt());
 
     } else {
       System.err.println("Unsupported statement: " + statement.toString());
+      return false;
     }
   }
 
@@ -102,10 +103,14 @@ public class CodeGenerator {
    * 
    * @param statement
    */
-  protected void evaluateStatement(BlockStmt statement) {
+  protected boolean evaluateStatement(BlockStmt statement) {
+    boolean hasReturn=false;
+
     for (Statement s : statement.getStatements()) {
-      evaluateStatement(s);
+      hasReturn = evaluateStatement(s) || hasReturn;
     }
+
+    return hasReturn;
   }
 
   /**
@@ -113,9 +118,9 @@ public class CodeGenerator {
    * 
    * @param statement
    */
-  protected void evaluateStatement(IfStmt statement) {
+  protected boolean evaluateStatement(IfStmt statement) {
+    // Condition
     EvaluatedData data = evaluateExpression(statement.getCondition());
-
     Instruction dummy;
     if (data.hasInstruction()) {
       dummy=data.getInstruction();
@@ -123,16 +128,23 @@ public class CodeGenerator {
       dummy=code.addJumpInstruction(OpCode.ifeq);
     }
 
-    evaluateStatement(statement.getThenStmt());
+    Instruction goToDummy = new Instruction(OpCode.nop, -1);
+
+    // Body
+    boolean hasReturnBody = evaluateStatement(statement.getThenStmt());
+    if (!hasReturnBody) {
+      code.addJumpInstruction(OpCode.goto_, goToDummy);
+    }
     dummy.setIndex(code.getCurrentIndex());
 
-    if(statement.hasElseBlock()) {
-      evaluateStatement(statement.getElseStmt().get());
-
-    } else if (statement.hasElseBranch()) {
-      evaluateStatement(statement.getElseStmt().get());
+    // Else/Else if block
+    boolean hasReturnElse = true;
+    if(statement.hasElseBlock() || statement.hasElseBranch()) {
+      hasReturnElse = evaluateStatement(statement.getElseStmt().get());
     }
 
+    goToDummy.setIndex(code.getCurrentIndex());
+    return hasReturnBody && hasReturnElse;
   }
 
   /**
@@ -141,8 +153,7 @@ public class CodeGenerator {
    * 
    * @param expression  Input return expression
    */
-  protected void evaluateStatement(ReturnStmt statement) {
-    hasReturn=true;
+  protected boolean evaluateStatement(ReturnStmt statement) {
     Optional<Expression> expression = statement.getExpression();
 
     if (expression.isEmpty()) {
@@ -156,6 +167,8 @@ public class CodeGenerator {
         code.addInstruction(OpCode.areturn);
       }
     }
+
+    return true;
   }
 
   /**
@@ -186,6 +199,9 @@ public class CodeGenerator {
 
     } else if (expression.isStringLiteralExpr()) {
       return evaluateExpression(expression.asStringLiteralExpr());
+
+    } else if (expression.isUnaryExpr()) { 
+      return evaluateExpression(expression.asUnaryExpr());
 
     } else if (expression.isVariableDeclarationExpr()) {
       return evaluateExpression(expression.asVariableDeclarationExpr());
@@ -243,7 +259,7 @@ public class CodeGenerator {
       code.addInstruction(OpCode.iadd);
       
       //operandStack.addStackItem(operandType, code.getCurrentIndex());
-      return new EvaluatedData(operandType, null, null);
+      return new EvaluatedData(operandType);
 
     // COMPARE STATEMENTS
     } else if (op==Operator.GREATER || 
@@ -256,6 +272,7 @@ public class CodeGenerator {
       Type left=evaluateExpression(expression.getLeft()).getType();
       Type right=evaluateExpression(expression.getRight()).getType();
 
+      //TODO
       if (left.isInt() && right.isInt()) {
         Instruction dummy;
         Type operandType = new Type("I", true);
@@ -277,10 +294,10 @@ public class CodeGenerator {
         //operandStack.addStackItem(operandType, code.getCurrentIndex());
         return new EvaluatedData(operandType, dummy);
       }
-
     }
-    
-    return new EvaluatedData(new EmptyType()); //TODO
+      
+    //TODO
+    return new EvaluatedData(new EmptyType());
   }
 
   /**
@@ -316,6 +333,7 @@ public class CodeGenerator {
     // Get type
     Type fieldType = new Type(expression.resolve().getType());
 
+    // Add instruction
     code.addInstruction(OpCode.getstatic, 
       2, constantPool.addField_info(
         scope.getName(), 
@@ -324,7 +342,7 @@ public class CodeGenerator {
       )
     );
 
-    return new EvaluatedData(fieldType, null, null);
+    return new EvaluatedData(fieldType);
   }
 
   /**
@@ -366,12 +384,15 @@ public class CodeGenerator {
    * @return            Expression Type
    */
   protected EvaluatedData evaluateExpression(MethodCallExpr expression) {
+    boolean isStatic =false;
+
     //Evaluate scope
     String scopeName;
     if(expression.getScope().isPresent()) {
       scopeName=evaluateExpression(expression.getScope().get()).getType().getName();
     } else {
       scopeName=className;
+      isStatic=true; //Assume no scope=static method //TODO
     }
 
     //Evaluate arguments
@@ -383,7 +404,16 @@ public class CodeGenerator {
     //Get method return type
     Type returnType = new Type(expression.resolve().getReturnType());
 
-    code.addInstruction(OpCode.invokevirtual,
+    //Determine if static or not
+    OpCode op;
+    if (isStatic) {
+      op=OpCode.invokestatic;
+    } else {
+      op=OpCode.invokevirtual;
+    }
+
+    //Add instruction
+    code.addInstruction(op,
       2, constantPool.addMethod_info(
         scopeName, 
         expression.getName().asString(),
@@ -407,17 +437,20 @@ public class CodeGenerator {
 
     //Search localVariableTable for variable name. Return type if it is not found
     int index = localVariables.find(expression.getNameAsString());
-    if (index==-1) return new EvaluatedData(exprType, null, null);;
+    if (index!=-1) {
 
-    if (exprType.isInt() || exprType.isBool()) {
-      if (index==0) {
-        code.addInstruction(OpCode.iload_0);
-      } else if (index==1) {
-        code.addInstruction(OpCode.iload_1);
-      } else if (index==2) {
-        code.addInstruction(OpCode.iload_2);
-      } else if (index==3) {
-        code.addInstruction(OpCode.iload_3);
+      if (exprType.isInt() || exprType.isBool()) {
+        if (index==0) {
+          code.addInstruction(OpCode.iload_0);
+        } else if (index==1) {
+          code.addInstruction(OpCode.iload_1);
+        } else if (index==2) {
+          code.addInstruction(OpCode.iload_2);
+        } else if (index==3) {
+          code.addInstruction(OpCode.iload_3);
+        } else {
+          //TODO
+        }
       }
     }
 
@@ -440,6 +473,27 @@ public class CodeGenerator {
     code.addMaxStack();
 
     return new EvaluatedData(exprType, expression.asString());
+  }
+
+  /**
+   * 
+   * 
+   * @param expression
+   * @return
+   */
+  protected EvaluatedData evaluateExpression(UnaryExpr expression) {
+    if (expression.getOperator()==UnaryExpr.Operator.MINUS) {
+      int value = expression.getExpression().asIntegerLiteralExpr().asNumber().intValue();
+
+      if(value==1) {
+        code.addInstruction(OpCode.iconst_m1);
+      } else {
+        code.addInstruction(OpCode.bipush, 1, -value);
+      }
+      return new EvaluatedData(new Type("I", true), -value);
+    }
+
+    return new EvaluatedData(new EmptyType());
   }
 
   /**
