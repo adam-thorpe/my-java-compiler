@@ -46,7 +46,12 @@ public class CompilerCore {
    */
   public CompilerCore(CompilationUnit cu, String filePath) {
     this.cu = cu;
-    this.filePath = filePath;
+
+    if(filePath!="") {
+      this.filePath=filePath+"/";
+    } else {
+      this.filePath = filePath;
+    }
 
     this.constantPool = new ConstantPool();
     this.interfacesTable = new InterfaceTable(constantPool);
@@ -72,7 +77,7 @@ public class CompilerCore {
           methodsTable, attributesTable);
 
       // Write out to file
-      Util.outputToFile(classFile.getData(), filePath + "/" + className + ".class");
+      Util.outputToFile(classFile.getData(), filePath + className + ".class");
     } catch (Exception e) {
       e.printStackTrace();
     }

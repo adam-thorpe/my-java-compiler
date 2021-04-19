@@ -28,7 +28,11 @@ public class App {
       CompilationUnit cu = StaticJavaParser.parse(new File(path.toString()));
       
       // Compile
-      new CompilerCore(cu, path.getParent().toString()).parse();
+      if(path.getParent()==null) {
+        new CompilerCore(cu, "").parse();
+      } else {
+        new CompilerCore(cu, path.getParent().toString()).parse();
+      }
 
     } catch (Exception e) {
       e.printStackTrace();
