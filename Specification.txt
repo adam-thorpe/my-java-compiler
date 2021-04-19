@@ -1,41 +1,37 @@
 Implemented
-	- Package
-	- Imports
 	- Class
 		○ Public
-	- Types
+	- Primitive Types
 		○ Int
 		○ Bool
-		○ Char
-		○ String
-		○ Class Types
-	- Variable Declaration
-		○ Global/Local
-		○ Public
+	- Non-Primitive Types
+		○ Eg. String
+	- Local Variables
 	- Method Declaration
 		○ Public/Static
-		○ Return types Void/Types
-		○ Up to one parameter
+		○ Parameters
+		○ Return types
 	- Blocks
-		○ If then else
+		○ If, else if, else
 		○ While
 	- Expressions
 		○ == < >
-		○ + - * /
+		○ + -
 		○ OR AND
-	- Assign values to variables
 	- Invoke
-		○ Method
-		○ Class
+		○ Public methods
+		○ User defined methods
 
 Not Implemented 
+	- Package
+	- Imports
 	- Constructors
 	- Interfaces
 	- Throws
 	- Private/Protected/Abstract/Final
 	- Super classes
-	- Arrays
-
+	- Arrays/Array Types
+	- Invoke class (eg. new MyClass())
 	- Structures
 		○ For
 		○ Switch
