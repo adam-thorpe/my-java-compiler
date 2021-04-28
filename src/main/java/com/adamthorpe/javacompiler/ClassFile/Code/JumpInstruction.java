@@ -17,6 +17,11 @@ public class JumpInstruction extends Instruction {
     this.args = new byte[2];
   }
 
+  public JumpInstruction(OpCode op, int index, int jumpToIndex) {
+    super(op, index);
+    setOffset(jumpToIndex);
+  }
+
   public void setOffset(int jumpToIndex) {
     this.jumpToIndex=jumpToIndex;
     this.args=ByteConvert.intToBytes(2, jumpToIndex-index);

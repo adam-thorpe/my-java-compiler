@@ -193,8 +193,7 @@ public class CodeGenerator {
     boolean hasReturn = evaluateStatement(statement.getBody());
 
     //Loop instruction
-    JumpInstruction loop = code.addJumpInstruction(OpCode.goto_);
-    loop.setOffset(startIndex);
+    code.addJumpInstruction(OpCode.goto_, startIndex);
 
     jumpCondition.setOffset(code.getCurrentIndex()); //Jump to end of block
     return hasReturn;

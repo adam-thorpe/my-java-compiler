@@ -69,6 +69,23 @@ public class ByteCode extends DataTable<Instruction> {
   }
 
   /**
+   * <p>Add a jump instruction to the list of bytecode instructions. This method is used when the 
+   * jumpToOffset is already known.</p>
+   * 
+   * @param op            OpCode of the instruction
+   * @param jumpToOffset  The index of the instruction to jump to
+   * @return              The Jump Instruction
+   */
+  public JumpInstruction addJumpInstruction(OpCode op, int jumpToOffset) {
+    JumpInstruction jumpInstruction = new JumpInstruction(op, currentIndex, jumpToOffset);
+
+    this.add(jumpInstruction);
+    currentIndex+=op.getLen();
+
+    return jumpInstruction;
+  }
+
+  /**
    * <p>Increase the max stack size.</p>
    * 
    * @param increment Increment to be added to <code>max_stack</code>
