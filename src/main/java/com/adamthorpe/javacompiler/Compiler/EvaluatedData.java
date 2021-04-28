@@ -1,25 +1,25 @@
 package com.adamthorpe.javacompiler.Compiler;
 
-import com.adamthorpe.javacompiler.ClassFile.Code.Instruction;
+import com.adamthorpe.javacompiler.ClassFile.Code.JumpInstruction;
 
 public class EvaluatedData {
 
   protected Type type;
   protected Object data;
-  protected Instruction dummy;
+  protected JumpInstruction jumpInstruction;
 
-  public EvaluatedData(Type type, Object data, Instruction dummy) {
+  public EvaluatedData(Type type, Object data, JumpInstruction jumpInstruction) {
     this.type=type;
     this.data=data;
-    this.dummy=dummy;
+    this.jumpInstruction=jumpInstruction;
   }
 
   public EvaluatedData(Type type, Object data) {
     this(type, data, null);
   }
 
-  public EvaluatedData(Type type, Instruction dummy) {
-    this(type, null, dummy);
+  public EvaluatedData(Type type, JumpInstruction jumpInstruction) {
+    this(type, null, jumpInstruction);
   }
 
   public EvaluatedData(Type type) {
@@ -39,11 +39,11 @@ public class EvaluatedData {
   }
 
   public boolean hasInstruction() {
-    return dummy!=null;
+    return jumpInstruction!=null;
   }
 
-  public Instruction getInstruction() {
-    return dummy;
+  public JumpInstruction getInstruction() {
+    return jumpInstruction;
   }
   
 }

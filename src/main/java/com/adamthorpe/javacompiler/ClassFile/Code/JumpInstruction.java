@@ -10,37 +10,20 @@ import com.adamthorpe.javacompiler.Utilities.ByteConvert;
  */
 public class JumpInstruction extends Instruction {
 
-  protected Instruction jumpTo;
-  protected int extraOffset;
+  protected int jumpToIndex;
 
-  public JumpInstruction(OpCode op, int index, Instruction jumpTo) {
+  public JumpInstruction(OpCode op, int index) {
     super(op, index);
     this.args = new byte[2];
-    this.jumpTo = jumpTo;
-    this.extraOffset=0;
   }
 
-  public JumpInstruction(OpCode op, int index, Instruction jumpTo, int extraOffset) {
-    this(op, index, jumpTo);
-    this.extraOffset=extraOffset;
+  public void setOffset(int jumpToIndex) {
+    this.jumpToIndex=jumpToIndex;
+    this.args=ByteConvert.intToBytes(2, jumpToIndex-index);
   }
 
-  /**
-   * <p>Calculates the jump offset index.</p>
-   * 
-   * @return  Offset of jump
-   */
-  public int calculateJumpOffset() {
-    int jump = jumpTo.getIndex()-index+extraOffset;
-    args = ByteConvert.intToBytes(2, jump);
-    
-    return jump;
-  }
-
-  @Override
-  public byte[] getData() {
-    calculateJumpOffset();
-    return ByteConvert.toByteArr(opcode, args);
+  public int getJumpToIndex() {
+    return jumpToIndex;
   }
 
   @Override

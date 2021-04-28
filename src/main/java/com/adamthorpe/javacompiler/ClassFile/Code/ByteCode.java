@@ -19,78 +19,53 @@ public class ByteCode extends DataTable<Instruction> {
   }
 
   /**
-   * <p>Add an instruction to the list of bytecode instructions.</p>
-   * 
-   * @param instruction A new instruction
-   */
-  public void addInstruction(Instruction instruction) {
-    instruction.setIndex(currentIndex);
-    this.add(instruction);
-    currentIndex+=instruction.getOpCode().getLen();
-  }
-
-  /**
    * <p>Add an instruction to the list of bytecode instructions. This method will create the
-   * instruction from a given opcode</p>
+   * instruction from a given opcode.</p>
    * 
    * @param op  OpCode of the instruction
+   * @return    Index of the instruction
    */
-  public void addInstruction(OpCode op) {
-    this.add(new Instruction(op, currentIndex));
+  public int addInstruction(OpCode op) {
+    int thisIndex = currentIndex;
+
+    this.add(new Instruction(op, thisIndex));
     currentIndex+=op.getLen();
+
+    return thisIndex;
   }
 
   /**
    * <p>Add an instruction to the list of bytecode instructions. This method will create the
-   * instruction from a given opcode and it's arguments</p>
+   * instruction from a given opcode and it's arguments.</p>
    * 
    * @param op    OpCode of the instruction
    * @param bytes Number of bytes needed for <code>args</code>
    * @param args  Aditional arguments
+   * @return      Index of the instruction
    */
-  public void addInstruction(OpCode op, int bytes, int args) {
-    this.add(new Instruction(op, currentIndex, bytes, args));
+  public int addInstruction(OpCode op, int bytes, int args) {
+    int thisIndex = currentIndex;
+
+    this.add(new Instruction(op, thisIndex, bytes, args));
     currentIndex+=op.getLen();
+
+    return thisIndex;
   }
 
   /**
-   * <p>Add a jump instruction to the list of bytecode instructions. This instruction is special, 
-   * beacause it will contain a link to another instruction of which it points to.</p>
+   * <p>Add a jump instruction to the list of bytecode instructions. The argument of this 
+   * instruction will be filled in later.</p>
    * 
    * @param op  OpCode of the instruction
-   * @return    The dummy pointer instruction
+   * @return    The Jump Instruction
    */
-  public Instruction addJumpInstruction(OpCode op) {
-    Instruction dummy = new Instruction(OpCode.nop, -1);
-    this.add(new JumpInstruction(op, currentIndex, dummy));
+  public JumpInstruction addJumpInstruction(OpCode op) {
+    JumpInstruction jumpInstruction = new JumpInstruction(op, currentIndex);
+
+    this.add(jumpInstruction);
     currentIndex+=op.getLen();
 
-    return dummy;
-  }
-
-  /**
-   * <p>Add a jump instruction to the list of bytecode instructions. This instruction is special, 
-   * beacause it will contain a link to another instruction of which it points to.</p>
-   * 
-   * @param op      OpCode of the instruction
-   * @param jumpTo  Instruction to jump to
-   */
-  public void addJumpInstruction(OpCode op, Instruction jumpTo) {
-    this.add(new JumpInstruction(op, currentIndex, jumpTo));
-    currentIndex+=op.getLen();
-  }
-
-  /**
-   * <p>Add a jump instruction to the list of bytecode instructions. This instruction is special, 
-   * beacause it will contain a link to another instruction of which it points to.</p>
-   * 
-   * @param op                OpCode of the instruction
-   * @param jumpTo            Instruction to jump to
-   * @param jumpToIndexOffset Additional offset
-   */
-  public void addJumpInstruction(OpCode op, Instruction jumpTo, int jumpToIndexOffset) {
-    this.add(new JumpInstruction(op, currentIndex, jumpTo, jumpToIndexOffset));
-    currentIndex+=op.getLen();
+    return jumpInstruction;
   }
 
   /**

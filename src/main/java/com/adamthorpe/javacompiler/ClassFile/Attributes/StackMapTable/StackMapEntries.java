@@ -34,7 +34,7 @@ public class StackMapEntries extends DataTable<StackMapFrame> {
         //Calculate current stack items and offset
         List<LocalVariable> currentLocals = localVariableTable.getCurrentLocals(index);
         List<OperandStackItem> currentOperands = operandStack.getCurrentLocals(index);
-        int offset = index + jumpInstruction.calculateJumpOffset();
+        int offset = jumpInstruction.getJumpToIndex();
         
         addFrame(offset, currentLocals, currentOperands);
       }

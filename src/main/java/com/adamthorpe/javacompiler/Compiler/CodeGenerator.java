@@ -10,6 +10,7 @@ import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
 import com.adamthorpe.javacompiler.ClassFile.Code.Instruction;
+import com.adamthorpe.javacompiler.ClassFile.Code.JumpInstruction;
 import com.adamthorpe.javacompiler.ClassFile.Code.OpCode;
 import com.adamthorpe.javacompiler.ClassFile.ConstantPool.ConstantPool;
 import com.adamthorpe.javacompiler.Utilities.Util;
@@ -125,30 +126,32 @@ public class CodeGenerator {
   protected boolean evaluateStatement(IfStmt statement) {
     // Condition
     EvaluatedData data = evaluateExpression(statement.getCondition());
-    Instruction dummy;
-    if (data.hasInstruction()) {
-      dummy=data.getInstruction();
-    } else {
-      dummy=code.addJumpInstruction(OpCode.ifeq);
-    }
 
-    Instruction goToDummy = new Instruction(OpCode.nop, -1);
+    // Get JumpInstruction
+    JumpInstruction jump1;
+    if (data.hasInstruction()) {
+      jump1=data.getInstruction();
+    } else {
+      jump1=code.addJumpInstruction(OpCode.ifeq);
+    }
 
     // Body
-    boolean hasReturnBody = evaluateStatement(statement.getThenStmt());
-    if (!hasReturnBody) {
-      code.addJumpInstruction(OpCode.goto_, goToDummy);
+    boolean hasReturnInBody = evaluateStatement(statement.getThenStmt());
+    JumpInstruction jump2 = new JumpInstruction(OpCode.nop, -1); // Dummy value
+    if (!hasReturnInBody) {
+      jump2 = code.addJumpInstruction(OpCode.goto_);
     }
-    dummy.setIndex(code.getCurrentIndex());
+
+    jump1.setOffset(code.getCurrentIndex()); // Jump to next statement
 
     // Else/Else if block
-    boolean hasReturnElse = true;
+    boolean hasReturnInElse = true;
     if(statement.hasElseBlock() || statement.hasElseBranch()) {
-      hasReturnElse = evaluateStatement(statement.getElseStmt().get());
+      hasReturnInElse = evaluateStatement(statement.getElseStmt().get());
     }
 
-    goToDummy.setIndex(code.getCurrentIndex());
-    return hasReturnBody && hasReturnElse;
+    jump2.setOffset(code.getCurrentIndex()); // Jump to end of block
+    return hasReturnInBody && hasReturnInElse;
   }
 
   /**
@@ -183,18 +186,17 @@ public class CodeGenerator {
    */
   protected boolean evaluateStatement(WhileStmt statement) {
     
-    int start = code.getCurrentIndex();
+    int startIndex = code.getCurrentIndex();
 
-    Instruction condition = evaluateExpression(statement.getCondition()).getInstruction();
+    // Jump Condition
+    JumpInstruction jumpCondition = evaluateExpression(statement.getCondition()).getInstruction();
     boolean hasReturn = evaluateStatement(statement.getBody());
 
-    //Set jump instruction
-    Instruction i = code.addJumpInstruction(OpCode.goto_);
-    i.setIndex(start);
+    //Loop instruction
+    JumpInstruction loop = code.addJumpInstruction(OpCode.goto_);
+    loop.setOffset(startIndex);
 
-
-    condition.setIndex(code.getCurrentIndex());
-
+    jumpCondition.setOffset(code.getCurrentIndex()); //Jump to end of block
     return hasReturn;
   }
 
@@ -282,24 +284,32 @@ public class CodeGenerator {
     if (op==Operator.AND || op==Operator.OR) {
       Type operandType=new Type("Z", true);
 
-      Instruction jumpToFalse = new Instruction(OpCode.iconst_0, -1);
-      Instruction jumpToTrue = new Instruction(OpCode.iconst_1, -1);
+      // Evaluate Left
       evaluateExpression(expression.getLeft());
-
+      JumpInstruction jump1;
       if (op==Operator.AND) {
-        code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
-      } else if (op==Operator.OR) {
-        code.addJumpInstruction(OpCode.ifne, jumpToTrue);
+        jump1 = code.addJumpInstruction(OpCode.ifeq); // Jump to false if left is false
+      } else { //OR
+        jump1 = code.addJumpInstruction(OpCode.ifne); // Jump to true if left is true
       }
 
+      // Evaluate Right
       evaluateExpression(expression.getRight());
-      code.addJumpInstruction(OpCode.ifeq, jumpToFalse);
-      code.addInstruction(jumpToTrue);
+      JumpInstruction jump2 = code.addJumpInstruction(OpCode.ifeq); // Always jump to false if right is false
 
+      // True and jump to End
+      int trueIndex = code.addInstruction(OpCode.iconst_1);
+      if (op==Operator.OR) jump1.setOffset(trueIndex);
       operandStack.addStackItem(operandType, code.getCurrentIndex());
+      JumpInstruction jump3 = code.addJumpInstruction(OpCode.goto_); // Jump to end
 
-      code.addJumpInstruction(OpCode.goto_, jumpToFalse, jumpToFalse.getOpCode().getLen());
-      code.addInstruction(jumpToFalse);
+      //False
+      int falseIndex = code.addInstruction(OpCode.iconst_0);
+      if (op==Operator.AND) jump1.setOffset(falseIndex);
+      jump2.setOffset(falseIndex);
+
+      //End
+      jump3.setOffset(code.getCurrentIndex());
 
       return new EvaluatedData(operandType);
     
@@ -332,25 +342,24 @@ public class CodeGenerator {
 
       //TODO
       if (left.isInt() && right.isInt()) {
-        Instruction dummy;
+        JumpInstruction jumpInstruction;
         Type operandType = new Type("I", true);
         
         if(op==Operator.GREATER) {
-          dummy = code.addJumpInstruction(OpCode.if_icmple);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmple);
         } else if (op==Operator.GREATER_EQUALS) {
-          dummy = code.addJumpInstruction(OpCode.if_icmplt);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmplt);
         } else if (op==Operator.LESS) {
-          dummy = code.addJumpInstruction(OpCode.if_icmpge);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmpge);
         } else if (op==Operator.LESS_EQUALS) {
-          dummy = code.addJumpInstruction(OpCode.if_icmpgt);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmpgt);
         } else if (op==Operator.EQUALS) {
-          dummy = code.addJumpInstruction(OpCode.if_icmpne);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmpne);
         } else {
-          dummy = code.addJumpInstruction(OpCode.if_icmpeq);
+          jumpInstruction = code.addJumpInstruction(OpCode.if_icmpeq);
         }
 
-        //operandStack.addStackItem(operandType, code.getCurrentIndex());
-        return new EvaluatedData(operandType, dummy);
+        return new EvaluatedData(operandType, jumpInstruction);
       }
     }
       

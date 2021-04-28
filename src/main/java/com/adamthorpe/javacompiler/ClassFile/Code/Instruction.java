@@ -29,15 +29,6 @@ public class Instruction implements ByteData {
   }
 
   /**
-   * <p>Sets the index of this instruction.</p>
-   * 
-   * @param index The given index
-   */
-  public void setIndex(int index) {
-    this.index = index;
-  }
-
-  /**
    * <p>Returns the OpCode of this instruction.</p>
    * 
    * @return  The OpCode of the instruction
@@ -76,7 +67,7 @@ public class Instruction implements ByteData {
   }
 
   /**
-   * 
+   *
    * 
    * @return
    */
