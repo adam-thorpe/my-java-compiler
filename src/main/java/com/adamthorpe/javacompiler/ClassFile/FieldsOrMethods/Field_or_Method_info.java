@@ -38,7 +38,7 @@ public class Field_or_Method_info implements ByteData {
   
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(access_flags, 
+    return ByteConvert.copyBytes(access_flags, 
       name_index, 
       descriptor_index, 
       attributes_count, 

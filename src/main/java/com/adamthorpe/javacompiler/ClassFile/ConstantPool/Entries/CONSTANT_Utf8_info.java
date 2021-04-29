@@ -18,7 +18,7 @@ public class CONSTANT_Utf8_info extends CONSTANT {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(tag, length, bytes);
+    return ByteConvert.copyBytes(tag, length, bytes);
   }
 
   @Override

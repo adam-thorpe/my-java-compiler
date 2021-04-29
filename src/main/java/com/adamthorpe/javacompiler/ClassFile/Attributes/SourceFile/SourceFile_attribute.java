@@ -27,7 +27,7 @@ public class SourceFile_attribute extends Attributes_info {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(attribute_name_index,
+    return ByteConvert.copyBytes(attribute_name_index,
       attribute_length,
       sourcefile_index);
   }

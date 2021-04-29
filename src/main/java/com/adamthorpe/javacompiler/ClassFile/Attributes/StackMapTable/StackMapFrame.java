@@ -95,7 +95,7 @@ public class StackMapFrame implements ByteData {
         stack.add(new VerificationType_info(local.getType()));
       }
 
-      this.stack=ByteConvert.toByteArr(stack);
+      this.stack=ByteConvert.copyBytes(stack);
       return;
 
     //CHOP
@@ -135,6 +135,6 @@ public class StackMapFrame implements ByteData {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(frame_type, offset_delta, stack);
+    return ByteConvert.copyBytes(frame_type, offset_delta, stack);
   }
 }

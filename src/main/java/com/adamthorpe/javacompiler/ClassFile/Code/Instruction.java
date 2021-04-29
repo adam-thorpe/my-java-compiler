@@ -54,7 +54,7 @@ public class Instruction implements ByteData {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(opcode, args);
+    return ByteConvert.copyBytes(opcode, args);
   }
 
   /**

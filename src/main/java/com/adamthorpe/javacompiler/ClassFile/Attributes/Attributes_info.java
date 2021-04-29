@@ -23,6 +23,6 @@ public abstract class Attributes_info implements ByteData {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(attribute_name_index, attribute_length);
+    return ByteConvert.copyBytes(attribute_name_index, attribute_length);
   }
 }

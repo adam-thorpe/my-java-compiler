@@ -147,6 +147,6 @@ public class ConstantPool extends DataTable<CONSTANT> {
    */
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(this.subList(1, this.size()));
+    return ByteConvert.copyBytes(this.subList(1, this.size()));
   }
 }

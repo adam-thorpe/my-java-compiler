@@ -13,7 +13,7 @@ public class ByteConvert {
    * @return            A byte array
    * @throws Exception  If <code>hex</code> contains an invalid character
    */
-  public static byte[] hexToByteArray(String hex) throws Exception {
+  public static byte[] hexToBytes(String hex) throws Exception {
 
     // If the input hex has an odd number of characters, append a 0 to the front
     if(hex.length()%2 !=0) {
@@ -75,7 +75,7 @@ public class ByteConvert {
    * @param data  One or more byte arrays
    * @return      A single byte array
    */
-  public static byte[] toByteArr(byte[] ...data) {
+  public static byte[] copyBytes(byte[] ...data) {
 
     // Calculate the length of the new array
     int length = 0;
@@ -103,7 +103,7 @@ public class ByteConvert {
    * @param dataArray List of byte arrays
    * @return          A single byte array
    */
-  public static byte[] toByteArr(List<? extends ByteData> dataArray) {
+  public static byte[] copyBytes(List<? extends ByteData> dataArray) {
     
     // Calculate the length of the new array
     int length = 0;

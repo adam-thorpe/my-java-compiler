@@ -31,6 +31,6 @@ public abstract class DataTable<E extends ByteData> extends ArrayList<E> impleme
    * @return  Byte array of data
    */
   public byte[] getData() {
-    return ByteConvert.toByteArr(this);
+    return ByteConvert.copyBytes(this);
   }
 }

@@ -18,7 +18,7 @@ public class CONSTANT_NameAndType_info extends CONSTANT {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(tag, name_index, descriptor_index);
+    return ByteConvert.copyBytes(tag, name_index, descriptor_index);
   }
 
   @Override

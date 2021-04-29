@@ -41,7 +41,7 @@ public class ClassFile implements ByteData {
       throws Exception {
 
     // Version Info
-    this.magic = ByteConvert.hexToByteArray("CAFEBABE"); // Magic Number used for every java class file
+    this.magic = ByteConvert.hexToBytes("CAFEBABE"); // Magic Number used for every java class file
     this.minor_version = ByteConvert.intToBytes(2, 0); // Minor version is always 0
     this.major_version = ByteConvert.intToBytes(2, 55); // JavaSE version 11 = 55
 
@@ -50,7 +50,7 @@ public class ClassFile implements ByteData {
     this.constant_pool = constant_pool.getData();
 
     // General Info
-    this.access_flags = ByteConvert.hexToByteArray("0021"); // public, super
+    this.access_flags = ByteConvert.hexToBytes("0021"); // public, super
     this.this_class = ByteConvert.intToBytes(2, this_class);
     this.super_class = ByteConvert.intToBytes(2, super_class);
 
@@ -73,7 +73,7 @@ public class ClassFile implements ByteData {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(magic,
+    return ByteConvert.copyBytes(magic,
       minor_version,
       major_version,
       constant_pool_count,

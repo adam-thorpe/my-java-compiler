@@ -18,7 +18,7 @@ public abstract class CONSTANT_ref extends CONSTANT {
 
   @Override
   public byte[] getData() {
-    return ByteConvert.toByteArr(tag, class_index, name_and_type_index);
+    return ByteConvert.copyBytes(tag, class_index, name_and_type_index);
   }
 
   @Override

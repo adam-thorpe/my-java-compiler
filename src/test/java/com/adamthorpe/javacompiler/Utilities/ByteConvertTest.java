@@ -10,15 +10,15 @@ public class ByteConvertTest {
   @Test
   public void testHexToByte() {
     try {
-      assertArrayEquals(new byte[] { 1 }, ByteConvert.hexToByteArray("1"));
-      assertArrayEquals(new byte[] { 15 }, ByteConvert.hexToByteArray("F"));
-      assertArrayEquals(new byte[] { 1 }, ByteConvert.hexToByteArray("01"));
-      assertArrayEquals(new byte[] { 16 }, ByteConvert.hexToByteArray("10"));
-      assertArrayEquals(new byte[] { 1, 1 }, ByteConvert.hexToByteArray("0101"));
-      assertArrayEquals(new byte[] { 127 }, ByteConvert.hexToByteArray("7F"));
-      assertArrayEquals(new byte[] { -128 }, ByteConvert.hexToByteArray("80"));
-      assertArrayEquals(new byte[] { -1 }, ByteConvert.hexToByteArray("FF"));
-      assertArrayEquals(new byte[] { -54, -2, -70, -66 }, ByteConvert.hexToByteArray("CAFEBABE"));
+      assertArrayEquals(new byte[] { 1 }, ByteConvert.hexToBytes("1"));
+      assertArrayEquals(new byte[] { 15 }, ByteConvert.hexToBytes("F"));
+      assertArrayEquals(new byte[] { 1 }, ByteConvert.hexToBytes("01"));
+      assertArrayEquals(new byte[] { 16 }, ByteConvert.hexToBytes("10"));
+      assertArrayEquals(new byte[] { 1, 1 }, ByteConvert.hexToBytes("0101"));
+      assertArrayEquals(new byte[] { 127 }, ByteConvert.hexToBytes("7F"));
+      assertArrayEquals(new byte[] { -128 }, ByteConvert.hexToBytes("80"));
+      assertArrayEquals(new byte[] { -1 }, ByteConvert.hexToBytes("FF"));
+      assertArrayEquals(new byte[] { -54, -2, -70, -66 }, ByteConvert.hexToBytes("CAFEBABE"));
     } catch (Exception e) {
       fail(e);
     }
@@ -43,10 +43,10 @@ public class ByteConvertTest {
 
   @Test
   public void testToByteArr() {
-    assertArrayEquals(new byte[]{}, ByteConvert.toByteArr(new byte[][]{{}}));
-    assertArrayEquals(new byte[]{1}, ByteConvert.toByteArr(new byte[][]{{1}}));
-    assertArrayEquals(new byte[]{1, 2}, ByteConvert.toByteArr(new byte[][]{{1}, {2}}));
-    assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteConvert.toByteArr(new byte[][]{{1, 2}, {3, 4}}));
-    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6}, ByteConvert.toByteArr(new byte[][]{{1}, {2, 3}, {4, 5, 6}}));
+    assertArrayEquals(new byte[]{}, ByteConvert.copyBytes(new byte[][]{{}}));
+    assertArrayEquals(new byte[]{1}, ByteConvert.copyBytes(new byte[][]{{1}}));
+    assertArrayEquals(new byte[]{1, 2}, ByteConvert.copyBytes(new byte[][]{{1}, {2}}));
+    assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteConvert.copyBytes(new byte[][]{{1, 2}, {3, 4}}));
+    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6}, ByteConvert.copyBytes(new byte[][]{{1}, {2, 3}, {4, 5, 6}}));
   }
 }
