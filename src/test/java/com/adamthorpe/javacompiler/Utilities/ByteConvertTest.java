@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class ByteConvertTest {
   @Test
-  public void testHexToByte() {
+  public void testHexToBytes() {
     try {
       assertArrayEquals(new byte[] { 1 }, ByteConvert.hexToBytes("1"));
       assertArrayEquals(new byte[] { 15 }, ByteConvert.hexToBytes("F"));
@@ -42,7 +42,7 @@ public class ByteConvertTest {
   }
 
   @Test
-  public void testToByteArr() {
+  public void testCopyBytes() {
     assertArrayEquals(new byte[]{}, ByteConvert.copyBytes(new byte[][]{{}}));
     assertArrayEquals(new byte[]{1}, ByteConvert.copyBytes(new byte[][]{{1}}));
     assertArrayEquals(new byte[]{1, 2}, ByteConvert.copyBytes(new byte[][]{{1}, {2}}));
