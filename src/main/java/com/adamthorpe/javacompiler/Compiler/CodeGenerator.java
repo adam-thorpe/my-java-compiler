@@ -9,7 +9,6 @@ import com.adamthorpe.javacompiler.ClassFile.OperandStack.OperandStack;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.AttributesTable;
 import com.adamthorpe.javacompiler.ClassFile.Attributes.StackMapTable.StackMapEntries;
 import com.adamthorpe.javacompiler.ClassFile.Code.ByteCode;
-import com.adamthorpe.javacompiler.ClassFile.Code.Instruction;
 import com.adamthorpe.javacompiler.ClassFile.Code.JumpInstruction;
 import com.adamthorpe.javacompiler.ClassFile.Code.OpCode;
 import com.adamthorpe.javacompiler.ClassFile.ConstantPool.ConstantPool;

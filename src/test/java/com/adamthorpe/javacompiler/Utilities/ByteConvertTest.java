@@ -4,6 +4,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.adamthorpe.javacompiler.ClassFile.ByteData;
+import com.adamthorpe.javacompiler.ClassFile.DataTable;
+
 import org.junit.Test;
 
 public class ByteConvertTest {
@@ -48,5 +51,44 @@ public class ByteConvertTest {
     assertArrayEquals(new byte[]{1, 2}, ByteConvert.copyBytes(new byte[][]{{1}, {2}}));
     assertArrayEquals(new byte[]{1, 2, 3, 4}, ByteConvert.copyBytes(new byte[][]{{1, 2}, {3, 4}}));
     assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6}, ByteConvert.copyBytes(new byte[][]{{1}, {2, 3}, {4, 5, 6}}));
+  }
+
+  @Test
+  public void testCopyBytes2() {
+    //Set up data classes
+    class MyByteData implements ByteData {
+      private byte[] data;
+
+      public MyByteData(byte[] data) {
+        this.data=data;
+      }
+
+      @Override
+      public int getLength() {
+        return data.length;
+      }
+
+      @Override
+      public byte[] getData() {
+        return data;
+      }
+    }
+
+    class MyDataTable extends DataTable<MyByteData> {
+      public MyDataTable(byte[] ...arr) {
+        for (byte[] data : arr) {
+          add(new MyByteData(data));
+        }
+      }
+    }
+
+    //Test
+    MyDataTable testA = new MyDataTable(new byte[]{});
+    MyDataTable testB = new MyDataTable(new byte[]{1,2,3});
+    MyDataTable testC = new MyDataTable(new byte[]{1}, new byte[]{2,3}, new byte[]{4,5,6});
+
+    assertArrayEquals(new byte[]{}, ByteConvert.copyBytes(testA));
+    assertArrayEquals(new byte[]{1,2,3}, ByteConvert.copyBytes(testB));
+    assertArrayEquals(new byte[]{1,2,3,4,5,6}, ByteConvert.copyBytes(testC));
   }
 }
