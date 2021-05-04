@@ -1,6 +1,5 @@
 package com.adamthorpe.javacompiler.Utilities;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -10,13 +9,10 @@ import com.adamthorpe.javacompiler.Compiler.Type;
 
 import org.junit.Test;
 
+/**
+ * Test Util.java
+ */
 public class UtilTest {
-
-  static Type stringReferenceType;
-  static Type objectArrReferenceType;
-  static Type intType;
-  static Type intArrType;
-  static Type voidType;
 
   private Type[] setupTypes() {
     Type[] types = new Type[4];

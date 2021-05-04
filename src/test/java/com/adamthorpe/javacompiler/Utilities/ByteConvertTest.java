@@ -9,6 +9,9 @@ import com.adamthorpe.javacompiler.ClassFile.DataTable;
 
 import org.junit.Test;
 
+/**
+ * Test ByteConvert.java
+ */
 public class ByteConvertTest {
   @Test
   public void testHexToBytes() {
