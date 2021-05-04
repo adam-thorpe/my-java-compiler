@@ -119,7 +119,7 @@ public class Type {
    * @param input The input string
    * @return      Formatted string
    */
-  protected String format(String input) {
+  public static String format(String input) {
     return input.replace('.', '/');
   }
 
